@@ -307,6 +307,6 @@ Each milestone is small, ends green (lint, typecheck, tests), and is started
 
 - Final bundle identifier / package name (placeholder: `com.orangeutan.app`).
 - Persistence module choice (M7).
-- Visual identity (M5): palette, fonts, logo, mascot, symbols, pixel-art style.
+- Visual identity (M5): Treehouse direction, light palette, Evening dark palette, the Soft type pairing (Nunito and Source Sans 3), the Compact orange, and the Grin monkey are approved (see `docs/brand.md`). Logo and pixel-art style are still open. The live app stays on the placeholder theme until a palette is approved for use in the app.
 - Monetization (none planned yet; no ads in the core loop).
 - License for the project (the template's Expo MIT license was removed).
