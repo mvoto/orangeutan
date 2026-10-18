@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orangeutan — monkey faces</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --page: #f6f1ea;
+        --ink: #2a211c;
+        --muted: #6d6258;
+        --line: #e4d9cc;
+        --card: #fffdfb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--ink);
+        font-family: 'Source Sans 3', sans-serif;
+        line-height: 1.45;
+      }
+      header,
+      footer {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 36px 24px 8px;
+      }
+      footer {
+        padding-bottom: 40px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      h1,
+      h2 {
+        font-family: Nunito, sans-serif;
+        margin: 0;
+        letter-spacing: -0.03em;
+      }
+      h1 {
+        font-size: 34px;
+      }
+      h2 {
+        font-size: 26px;
+      }
+      p {
+        margin: 0;
+      }
+      .kicker {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .lede {
+        max-width: 70ch;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      main {
+        max-width: 480px;
+        margin: 20px auto 28px;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      article {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .stage {
+        padding: 18px 16px 8px;
+        background: #efe4d8;
+      }
+      .why {
+        margin-top: 8px;
+        font-size: 15px;
+        color: var(--muted);
+      }
+      .hero {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        padding: 8px 16px 4px;
+        background: #efe4d8;
+      }
+      .hero svg {
+        width: 200px;
+        height: 200px;
+      }
+      .board-wrap {
+        padding: 14px 16px 8px;
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        padding: 10px;
+        border-radius: 16px;
+        background: #fbf6f0;
+      }
+      .cell {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+      }
+      .cell svg {
+        width: 92%;
+        height: 92%;
+      }
+      .empty {
+        border: 2px solid #7a5340;
+      }
+      .icons {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        padding: 8px 16px 18px;
+      }
+      .icons figcaption {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .icon-lg {
+        width: 96px;
+        height: 96px;
+        border-radius: 22px;
+        display: block;
+      }
+      .icon-sm {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        display: block;
+      }
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p class="kicker">Approved · Grin and Compact</p>
+      <h1>Grin is the monkey</h1>
+      <p class="lede">Smaller side ears, no inner circle, open smile. Compact stays the orange.</p>
+    </header>
+    <main id="styles"></main>
+    <footer>Approved. The running app is still the grey placeholder.</footer>
+    <script>
+      const fur = '#E0BC88';
+      const cup = '#F0C09A';
+      const muzzle = '#F8E6D0';
+      const eye = '#3A2A22';
+      const paper = '#FBF6F0';
+      const slate = '#4E6A78';
+
+      const styles = [
+        { name: 'Grin', why: 'The same open smile. Smaller ears, with no inner circle.' },
+      ];
+      const grid = ['M', '', 'O', '', 'O', 'M', '', 'O', '', 'O', 'M', 'M', 'M', 'O', 'O', ''];
+
+      function monkey(style) {
+        const calm = style === 'Calm';
+        const grin = style === 'Grin';
+        const eyeRx = grin ? 4.3 : calm ? 3.1 : 3.7;
+        const eyeRy = grin ? 4.5 : calm ? 3.5 : 4.7;
+        const muzRx = calm ? 13 : 11;
+        const muzRy = calm ? 9.2 : 8.4;
+        const mouth = grin
+          ? `<path d="M25 44 Q32 53 39 44 Q32 47.5 25 44" fill="${eye}"/>`
+          : calm
+            ? `<path d="M27 46 Q32 48 37 46" fill="none" stroke="${eye}" stroke-width="1.6" stroke-linecap="round"/>`
+            : `<path d="M26 45 Q32 50 38 45" fill="none" stroke="${eye}" stroke-width="1.7" stroke-linecap="round"/>`;
+        return `<g>
+          <circle cx="13.5" cy="32" r="8.5" fill="${fur}" stroke="${paper}" stroke-width="2.4"/>
+          <circle cx="50.5" cy="32" r="8.5" fill="${fur}" stroke="${paper}" stroke-width="2.4"/>
+          <circle cx="32" cy="32" r="16" fill="${fur}" stroke="${paper}" stroke-width="2.4"/>
+          <ellipse cx="32" cy="40" rx="${muzRx}" ry="${muzRy}" fill="${muzzle}"/>
+          <ellipse cx="25.5" cy="28.5" rx="${eyeRx}" ry="${eyeRy}" fill="${eye}"/>
+          <ellipse cx="38.5" cy="28.5" rx="${eyeRx}" ry="${eyeRy}" fill="${eye}"/>
+          <circle cx="26.8" cy="26.8" r="1.25" fill="${paper}"/>
+          <circle cx="39.8" cy="26.8" r="1.25" fill="${paper}"/>
+          <ellipse cx="30.4" cy="39.2" rx="1.15" ry="0.85" fill="${eye}"/>
+          <ellipse cx="33.6" cy="39.2" rx="1.15" ry="0.85" fill="${eye}"/>
+          ${mouth}
+        </g>`;
+      }
+
+      function orange() {
+        return `<g>
+          <circle cx="32" cy="38" r="20" fill="#F6A15A" stroke="#FBF6F0" stroke-width="3.5"/>
+          <ellipse cx="24" cy="30" rx="6" ry="4" fill="#FBF6F0" opacity="0.55"/>
+          <ellipse cx="44" cy="20" rx="14" ry="8" transform="rotate(-28 44 20)" fill="#3E6848"/>
+        </g>`;
+      }
+
+      function icon(style) {
+        return `<svg viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="14" fill="#FBF6F0"/>
+          <g transform="translate(0 4) scale(0.48)">${monkey(style)}</g>
+          <g transform="translate(32 8) scale(0.42)">${orange()}</g>
+        </svg>`;
+      }
+
+      function tile(style, kind) {
+        const bg = kind === 'M' ? slate : '#E07030';
+        const art = kind === 'M' ? monkey(style) : orange();
+        return `<div class="cell" style="background:${bg}"><svg viewBox="0 0 64 64">${art}</svg></div>`;
+      }
+
+      document.getElementById('styles').innerHTML = styles
+        .map((style) => {
+          const cells = grid
+            .map((kind) => (kind ? tile(style.name, kind) : `<div class="cell empty"></div>`))
+            .join('');
+          return `<article>
+          <div class="stage">
+            <p class="kicker">${style.name}</p>
+            <h2>${style.name}</h2>
+            <p class="why">${style.why}</p>
+          </div>
+          <div class="hero">
+            <svg viewBox="0 0 64 64">${monkey(style.name)}</svg>
+            <svg viewBox="0 0 64 64">${orange()}</svg>
+          </div>
+          <div class="board-wrap"><div class="board">${cells}</div></div>
+          <div class="icons">
+            <figure>${icon(style.name).replace('<svg ', '<svg class="icon-lg" ')}<figcaption>96px icon</figcaption></figure>
+            <figure>${icon(style.name).replace('<svg ', '<svg class="icon-sm" ')}<figcaption>24px</figcaption></figure>
+          </div>
+        </article>`;
+        })
+        .join('');
+    </script>
+  </body>
+</html>
