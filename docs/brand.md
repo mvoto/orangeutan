@@ -1,8 +1,8 @@
 # Orangeutan brand
 
-Visual decisions live here once the owner approves them. The live app stays
-on the neutral placeholder theme until a palette is explicitly approved for
-use in the app.
+Visual decisions live here once the owner approves them. The live app uses
+the Treehouse light palette and the Soft type pairing. Evening is approved
+and not applied yet.
 
 ## Approved
 
@@ -56,7 +56,7 @@ Approved. Do not change these without asking.
 | Display | Nunito        | Titles, level numbers, the wordmark    |
 | Body    | Source Sans 3 | Rules, buttons, and other reading text |
 
-Both are free on Google Fonts. They are not loaded in the app yet.
+Both are free on Google Fonts. The app loads Nunito (600 and 700) and Source Sans 3 (400 and 600).
 
 ### Orange symbol (Compact)
 
