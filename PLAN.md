@@ -16,8 +16,8 @@ art, names, and presentation are original.
 
 ### Board
 
-- A square grid of even size **N**. Launch size: **6×6**. Later: **4×4** (easy)
-  and **8×8** (hard).
+- A square grid of even size **N**. The sequence starts with one **4×4**,
+  then **6×6**, then **8×8**. At least 200 Levels. See `docs/adr/0001-one-way-levels.md`.
 - Each cell is either empty, a **monkey**, or an **orange**.
 - Some cells start pre-filled ("givens") and cannot be changed by the player.
 
@@ -36,13 +36,23 @@ art, names, and presentation are original.
 
 - Every shipped puzzle has **exactly one** solution, and it can be reached
   by logic alone (no guessing), verified by the solver.
-- Solving a level reveals that level's **pixel-art picture**.
+- Solving a Level opens a Celebration, then the next Level. The Level's
+  **pixel-art picture** is a later reward, not the Celebration.
 
-### Player interaction (draft, to confirm in the gameplay milestone)
+### Player interaction
 
-- Tap a cell to cycle: empty → monkey → orange → empty.
-- Rule violations are highlighted gently (no harsh red flashes).
-- Undo, hint, and reset are available. Levels can always be replayed.
+Confirmed. Terms are in `GLOSSARY.md`. The sequence decision is in
+`docs/adr/0001-one-way-levels.md`.
+
+- PLAY opens Level 1, then the current unsolved Level. A solved Level is retired.
+- Tap a cell to cycle: empty → monkey → orange → empty. Givens do not change.
+- Level 1 is 4×4, has no Edge clues, and starts with at least one monkey and one orange Given.
+- Edge clues begin on the first 6×6. Within a size, more Givens come first.
+- Rule cards for the rules that Puzzle uses sit on every Level.
+- Broken rules outline the involved cells while the player plays.
+- A quiet back control leaves an unfinished Level as it is.
+- The Celebration uses the current orangutan-and-orange drawing. Next continues. Home, after the last Level, shows the Score and Share.
+- No undo and no reset. Hint can be added later.
 
 ---
 
@@ -221,13 +231,13 @@ Each milestone is small, ends green (lint, typecheck, tests), and is started
 | 1   | Foundation                 | Expo + TS strict, lint, format, tests, routing, placeholder theme, loading screen. Runs on iOS simulator and Android emulator. |
 | 2   | Engine: model + validator  | Types, grid, rules, validator; full unit tests.                                                                                |
 | 3   | Engine: solver             | Propagation + solution counting; uniqueness proofs; property-based tests.                                                      |
-| 4   | Engine: generator + levels | Seeded generator, difficulty rating, level-pack script, shipped 6×6 pack verified in tests.                                    |
+| 4   | Engine: generator + levels | Seeded generator, difficulty rating, level-pack script, at least 200 Levels verified in tests.                                 |
 | 5   | Identity exploration       | Mood board, palette, fonts, mascot, symbols, logo options. **Preview + approval.**                                             |
 | 6   | Game screen                | Grid, tap input, clues, violation highlights, win detection. Layout **previewed first**.                                       |
-| 7   | Progression + persistence  | Level select, saved progress, versioned save schema with safe migrations.                                                      |
+| 7   | Progression + persistence  | Current unsolved Level only, saved progress, versioned save schema with safe migrations. No replay.                            |
 | 8   | Pixel-art rewards          | Reveal animation and gallery. Art style **approved first**.                                                                    |
-| 9   | Helpers                    | Undo, hint (logical next step with explanation), reset, optional timer.                                                        |
-| 10  | Polish                     | Haptics, sound, accessibility, reduced motion, 4×4 and 8×8 packs.                                                              |
+| 9   | Helpers                    | Hint (logical next step with explanation). Undo and reset are not planned.                                                     |
+| 10  | Polish                     | Haptics, sound, accessibility, reduced motion.                                                                                  |
 | 11  | Release                    | Final icon and splash, EAS builds, TestFlight / internal testing, store listing.                                               |
 
 ---
