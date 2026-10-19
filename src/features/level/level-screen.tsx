@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { cycleCell, levelOne } from '@/engine';
+import { brokenLines, cycleCell, levelOne } from '@/engine';
 import type { Cell } from '@/engine';
 import { useTheme } from '@/theme';
 import { AppText, Screen } from '@/ui';
@@ -9,12 +9,13 @@ import { AppText, Screen } from '@/ui';
 const ruleCards = ['No three in a row', 'Balance'] as const;
 const size = levelOne.size;
 
-/** Level 1. Outlines and back arrive with the later play tests. */
+/** Level 1. A quiet back control arrives with the session test. */
 export function LevelScreen(): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
   const [cells, setCells] = useState<readonly Cell[]>(() =>
     levelOne.givens.map((given): Cell => given ?? 'empty'),
   );
+  const outlined = outlinedCells(cells);
 
   return (
     <Screen testID="level-screen">
@@ -43,17 +44,20 @@ export function LevelScreen(): React.JSX.Element {
             {Array.from({ length: size }, (_, column) => {
               const index = row * size + column;
               const cell = cells[index] ?? 'empty';
+              const breaks = outlined.has(index);
               return (
                 <Pressable
                   key={column}
                   accessibilityRole="button"
                   accessibilityLabel={`Row ${row + 1}, column ${column + 1}, ${cell}`}
+                  accessibilityHint={breaks ? 'Breaks a rule' : undefined}
                   onPress={() => setCells((current) => cycleCell(levelOne, current, index))}
                   style={[
                     styles.cell,
                     {
                       backgroundColor: colors.surface,
-                      borderColor: colors.border,
+                      borderColor: breaks ? colors.textPrimary : colors.border,
+                      borderWidth: breaks ? 3 : 1,
                     },
                   ]}
                 >
@@ -66,6 +70,18 @@ export function LevelScreen(): React.JSX.Element {
       </View>
     </Screen>
   );
+}
+
+function outlinedCells(cells: readonly Cell[]): ReadonlySet<number> {
+  const indexes = new Set<number>();
+  for (const broken of brokenLines(cells)) {
+    for (let offset = 0; offset < size; offset += 1) {
+      const index =
+        broken.line === 'row' ? broken.index * size + offset : offset * size + broken.index;
+      indexes.add(index);
+    }
+  }
+  return indexes;
 }
 
 function mark(cell: Cell): string {
@@ -94,6 +110,5 @@ const styles = StyleSheet.create({
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
 });
