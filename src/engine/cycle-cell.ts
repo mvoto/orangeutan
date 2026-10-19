@@ -10,6 +10,21 @@ export function cycleCell(puzzle: Puzzle, cells: readonly Cell[], index: number)
   if (current === undefined) {
     throw new Error(`Missing cell ${index}`);
   }
-  next[index] = 'monkey';
+  next[index] = nextCell(current);
   return next;
+}
+
+function nextCell(current: Cell): Cell {
+  switch (current) {
+    case 'empty':
+      return 'monkey';
+    case 'monkey':
+      return 'orange';
+    case 'orange':
+      return 'empty';
+    default: {
+      const neverCell: never = current;
+      return neverCell;
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 
 import { renderWithTheme } from '@/test/render-with-theme';
 
@@ -10,5 +10,18 @@ describe('Level 1', () => {
 
     expect(screen.getByText('No three in a row')).toBeOnTheScreen();
     expect(screen.getByText('Balance')).toBeOnTheScreen();
+  });
+
+  it('cycles an empty cell through monkey and orange', async () => {
+    await renderWithTheme(<LevelScreen />);
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, monkey' }));
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, orange' })).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, orange' }));
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, empty' })).toBeOnTheScreen();
   });
 });
