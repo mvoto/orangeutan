@@ -1,4 +1,4 @@
-import { brokenLines, cycleCell } from '@/engine';
+import { brokenLines, cycleCell, levelOne, logicalSolution } from '@/engine';
 
 import type { Cell } from '@/engine';
 
@@ -110,5 +110,52 @@ describe('4×4 rules with no Edge clues', () => {
     expect(cycleCell(puzzle, cells, 0)).toEqual(cells);
     expect(cycleCell(puzzle, cells, 11)).toEqual(cells);
     expect(cycleCell(puzzle, cells, 1)).not.toEqual(cells);
+  });
+
+  it('gives Level 1 exactly one logical solution and no Edge clues', () => {
+    expect(levelOne).toEqual({
+      size: 4,
+      edgeClues: [],
+      givens: [
+        'orange',
+        'orange',
+        null,
+        null,
+        null,
+        null,
+        'monkey',
+        'monkey',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+    });
+
+    expect(logicalSolution(levelOne)).toEqual({
+      count: 1,
+      cells: [
+        'orange',
+        'orange',
+        'monkey',
+        'monkey',
+        'orange',
+        'orange',
+        'monkey',
+        'monkey',
+        'monkey',
+        'monkey',
+        'orange',
+        'orange',
+        'monkey',
+        'monkey',
+        'orange',
+        'orange',
+      ],
+    });
   });
 });
