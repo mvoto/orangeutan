@@ -1,6 +1,6 @@
-import { brokenLines, cycleCell, levelOne, logicalSolution } from '@/engine';
+import { brokenLines, cycleCell, levelOne, logicalSolution } from '../index';
 
-import type { Cell } from '@/engine';
+import type { Cell } from '../types';
 
 function grid(pattern: string): Cell[] {
   return pattern
