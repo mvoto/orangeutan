@@ -1,7 +1,6 @@
 /**
  * Approved Treehouse palettes (light, Evening) and the Soft type pairing.
- * Not wired into the app. The live theme stays the neutral placeholder
- * until the owner approves applying a palette.
+ * Light is the live app theme. Evening is approved and not applied yet.
  */
 
 export type TreehousePalette = {

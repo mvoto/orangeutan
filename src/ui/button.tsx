@@ -21,7 +21,7 @@ export function Button({ label, onPress, testID }: ButtonProps): React.JSX.Eleme
       style={({ pressed }) => [
         styles.base,
         {
-          backgroundColor: colors.accent,
+          backgroundColor: colors.primary,
           borderRadius: radii.pill,
           paddingVertical: spacing.sm + spacing.xs,
           paddingHorizontal: spacing.lg,

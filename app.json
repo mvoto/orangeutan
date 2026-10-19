@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#F2F2F2",
+    "backgroundColor": "#EFE4D8",
     "platforms": ["ios", "android"],
     "ios": {
       "bundleIdentifier": "com.orangeutan.app",
@@ -30,11 +30,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F2F2F2",
+          "backgroundColor": "#EFE4D8",
           "image": "./assets/splash-icon.png",
           "imageWidth": 160
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

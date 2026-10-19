@@ -15,6 +15,7 @@ export type ColorTokens = {
   readonly textSecondary: string;
   readonly textInverse: string;
   readonly accent: string;
+  readonly primary: string;
   readonly danger: string;
 };
 
@@ -27,6 +28,7 @@ export const placeholderColors: ColorTokens = {
   textSecondary: '#6B6B6B',
   textInverse: '#FFFFFF',
   accent: '#555555',
+  primary: '#555555',
   danger: '#9A3B3B',
 };
 

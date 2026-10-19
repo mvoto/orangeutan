@@ -1,6 +1,6 @@
 /**
  * Approved tile symbols. Not wired into the app.
- * The live theme stays the neutral placeholder until a palette is approved for use.
+ * The light palette is live. These drawings are still not shown in the app.
  */
 
 export const grinMonkeySvg = `<svg viewBox="0 0 64 64" aria-hidden="true">
