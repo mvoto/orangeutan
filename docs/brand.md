@@ -64,7 +64,7 @@ Approved. A bright peel `#F6A15A` with a paper ring `#FBF6F0`, a paper highlight
 
 ### Monkey symbol (Grin)
 
-Approved. Do not change it without asking. A round head, smaller side ears, and no inner ear circle. An open smile. Fur `#E0BC88`, paper ring `#FBF6F0`, muzzle `#F8E6D0`, eyes and smile `#3A2A22`. Those drawing colors belong to this face. They do not replace palette tokens. The SVG lives in `src/theme/symbols.ts` as `grinMonkeySvg`. It is not wired into the app.
+Approved. Do not change it without asking. A round head, smaller side ears, and no inner ear circle. An open smile. Fur `#E0BC88`, paper ring `#FBF6F0`, muzzle `#F8E6D0`, eyes and smile `#3A2A22`. Those drawing colors belong to this face. They do not replace palette tokens. The SVG lives in `src/theme/symbols.ts` as `grinMonkeySvg`. The board draws it on the monkey wash, and the Compact orange on the orange wash.
 
 ## Not approved
 

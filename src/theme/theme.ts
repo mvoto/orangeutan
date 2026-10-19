@@ -30,6 +30,8 @@ export const treehouseTheme: Theme = {
     textInverse: '#FFFFFF',
     accent: treehouseLight.accent,
     primary: treehouseLight.primary,
+    monkey: treehouseLight.monkey,
+    orange: treehouseLight.orange,
     border: treehouseLight.text,
     // No approved error color yet, so failures stay in the text color rather than a new hue.
     danger: treehouseLight.text,
