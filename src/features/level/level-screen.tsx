@@ -1,24 +1,25 @@
-import { useState } from 'react';
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { brokenLines, cycleCell, levelOne } from '@/engine';
+import { brokenLines, levelOne } from '@/engine';
 import type { Cell } from '@/engine';
 import { useTheme } from '@/theme';
-import { AppText, Screen } from '@/ui';
+import { AppText, Button, Screen } from '@/ui';
+
+import { useLevelSession } from './level-session';
 
 const ruleCards = ['No three in a row', 'Balance'] as const;
 const size = levelOne.size;
 
-/** Level 1. A quiet back control arrives with the session test. */
+/** Level 1, the 4×4 Puzzle with no Edge clues. */
 export function LevelScreen(): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const [cells, setCells] = useState<readonly Cell[]>(() =>
-    levelOne.givens.map((given): Cell => given ?? 'empty'),
-  );
+  const { cells, cycle } = useLevelSession();
   const outlined = outlinedCells(cells);
 
   return (
     <Screen testID="level-screen">
+      <Button label="Back" onPress={() => router.back()} />
       <AppText variant="title">Level 1</AppText>
       <View style={[styles.cards, { gap: spacing.sm, marginTop: spacing.md }]}>
         {ruleCards.map((title) => (
@@ -51,7 +52,7 @@ export function LevelScreen(): React.JSX.Element {
                   accessibilityRole="button"
                   accessibilityLabel={`Row ${row + 1}, column ${column + 1}, ${cell}`}
                   accessibilityHint={breaks ? 'Breaks a rule' : undefined}
-                  onPress={() => setCells((current) => cycleCell(levelOne, current, index))}
+                  onPress={() => cycle(index)}
                   style={[
                     styles.cell,
                     {

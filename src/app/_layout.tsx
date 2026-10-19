@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { LevelSessionProvider } from '@/features/level';
 import { treehouseTheme, treehouseType, ThemeProvider } from '@/theme';
 import { ErrorFallback } from '@/ui';
 
@@ -48,14 +49,16 @@ export default function RootLayout(): React.JSX.Element | null {
 
   return (
     <ThemeProvider theme={treehouseTheme}>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          contentStyle: { backgroundColor: treehouseTheme.colors.background },
-        }}
-      />
+      <LevelSessionProvider>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'fade',
+            contentStyle: { backgroundColor: treehouseTheme.colors.background },
+          }}
+        />
+      </LevelSessionProvider>
     </ThemeProvider>
   );
 }
