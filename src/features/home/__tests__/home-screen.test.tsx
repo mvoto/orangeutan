@@ -22,4 +22,18 @@ describe('<HomeScreen />', () => {
 
     expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toBeOnTheScreen();
   });
+
+  it('sizes the drawing to its frame so PLAY stays on screen', async () => {
+    await renderWithTheme(<HomeScreen />);
+
+    expect(screen.getByTestId('mascot-frame')).toHaveStyle({
+      maxWidth: 320,
+      aspectRatio: 768 / 1152,
+      flexShrink: 1,
+    });
+    expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toHaveStyle({
+      width: '100%',
+      height: '100%',
+    });
+  });
 });

@@ -1,6 +1,6 @@
 /**
- * Approved tile symbols. Not wired into the app.
- * The light palette is live. These drawings are still not shown in the app.
+ * Approved tile symbols. Compact orange and Grin monkey.
+ * Drawing colors belong to these faces. They do not replace palette tokens.
  */
 
 export const grinMonkeySvg = `<svg viewBox="0 0 64 64" aria-hidden="true">

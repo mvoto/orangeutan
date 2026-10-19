@@ -27,6 +27,21 @@ describe('Level 1', () => {
     expect(screen.getByText('Balance')).toBeOnTheScreen();
   });
 
+  it('uses the approved tile washes and symbols instead of letters', async () => {
+    await renderLevel(treehouseTheme);
+
+    expect(screen.getByRole('button', { name: 'Row 1, column 1, orange' })).toHaveStyle({
+      backgroundColor: '#E07030',
+    });
+    expect(screen.getByRole('button', { name: 'Row 2, column 3, monkey' })).toHaveStyle({
+      backgroundColor: '#4E6A78',
+    });
+    expect(screen.getAllByTestId('symbol-orange')).toHaveLength(2);
+    expect(screen.getAllByTestId('symbol-monkey')).toHaveLength(2);
+    expect(screen.queryByText('O')).not.toBeOnTheScreen();
+    expect(screen.queryByText('M')).not.toBeOnTheScreen();
+  });
+
   it('cycles an empty cell through monkey and orange', async () => {
     await renderLevel();
 

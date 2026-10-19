@@ -1,10 +1,12 @@
 import { memo, useMemo } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { SvgXml } from 'react-native-svg';
 
 import { brokenLines, cellIndex, levelOne } from '@/engine';
 import type { Cell } from '@/engine';
-import { useTheme } from '@/theme';
+import type { ColorTokens } from '@/theme';
+import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
 import { AppText, Button, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
@@ -23,6 +25,7 @@ type GridCellProps = {
   readonly cell: Cell;
   readonly onCycle: (index: number) => void;
   readonly style: StyleProp<ViewStyle>;
+  readonly wash: StyleProp<ViewStyle>;
 };
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
@@ -51,27 +54,14 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   );
   const rowStyle = useMemo(() => [styles.row, { gap: spacing.xs }], [spacing.xs]);
   const cellStyle = useMemo(
-    () => [
-      styles.cell,
-      {
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderStyle: 'solid' as const,
-      },
-    ],
-    [colors.surface, colors.border],
+    () => [styles.cell, { borderColor: colors.border, borderStyle: 'solid' as const }],
+    [colors.border],
   );
   const brokenCellStyle = useMemo(
-    () => [
-      styles.cell,
-      {
-        backgroundColor: colors.surface,
-        borderColor: colors.textPrimary,
-        borderStyle: 'dashed' as const,
-      },
-    ],
-    [colors.surface, colors.textPrimary],
+    () => [styles.cell, { borderColor: colors.textPrimary, borderStyle: 'dashed' as const }],
+    [colors.textPrimary],
   );
+  const washes = useMemo(() => washStyles(colors), [colors]);
 
   return (
     <Screen testID="level-screen">
@@ -98,6 +88,7 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
                   cell={cell}
                   onCycle={cycle}
                   style={outlined.has(index) ? brokenCellStyle : cellStyle}
+                  wash={washes[cell]}
                 />
               );
             })}
@@ -115,15 +106,20 @@ const GridCell = memo(function GridCell({
   cell,
   onCycle,
   style,
+  wash,
 }: GridCellProps): React.JSX.Element {
+  const xml = symbolXml(cell);
+
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Row ${row + 1}, column ${column + 1}, ${cell}`}
       onPress={() => onCycle(index)}
-      style={style}
+      style={[style, wash]}
     >
-      <AppText align="center">{mark(cell)}</AppText>
+      {xml === null ? null : (
+        <SvgXml xml={xml} width="72%" height="72%" testID={`symbol-${cell}`} accessible={false} />
+      )}
     </Pressable>
   );
 });
@@ -136,14 +132,22 @@ function outlinedCells(cells: readonly Cell[]): ReadonlySet<number> {
   return indexes;
 }
 
-function mark(cell: Cell): string {
+function washStyles(colors: ColorTokens): Record<Cell, ViewStyle> {
+  return StyleSheet.create({
+    empty: { backgroundColor: colors.surface },
+    monkey: { backgroundColor: colors.monkey },
+    orange: { backgroundColor: colors.orange },
+  });
+}
+
+function symbolXml(cell: Cell): string | null {
   switch (cell) {
     case 'monkey':
-      return 'M';
+      return grinMonkeySvg;
     case 'orange':
-      return 'O';
+      return compactOrangeSvg;
     case 'empty':
-      return '';
+      return null;
     default: {
       const neverCell: never = cell;
       return neverCell;

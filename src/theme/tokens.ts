@@ -17,6 +17,8 @@ export type ColorTokens = {
   readonly accent: string;
   readonly primary: string;
   readonly danger: string;
+  readonly monkey: string;
+  readonly orange: string;
 };
 
 export const placeholderColors: ColorTokens = {
@@ -30,6 +32,8 @@ export const placeholderColors: ColorTokens = {
   accent: '#555555',
   primary: '#555555',
   danger: '#9A3B3B',
+  monkey: '#9A9A9A',
+  orange: '#4A4A4A',
 };
 
 export const spacing = {

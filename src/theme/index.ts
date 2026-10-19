@@ -1,3 +1,4 @@
+export { compactOrangeSvg, grinMonkeySvg } from './symbols';
 export type { Theme } from './theme';
 export { treehouseType } from './treehouse';
 export { placeholderTheme, treehouseTheme } from './theme';

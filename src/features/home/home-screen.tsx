@@ -32,14 +32,16 @@ export function HomeScreen({ onPlay = noAction }: HomeScreenProps): React.JSX.El
         </Pressable>
       </View>
       <View style={[styles.center, { gap: spacing.lg }]}>
-        <Image
-          accessible
-          accessibilityRole="image"
-          accessibilityLabel="Orangutan holding an orange"
-          source={require('../../../assets/mascot-home.jpg')}
-          resizeMode="contain"
-          style={styles.mascot}
-        />
+        <View style={styles.mascotFrame} testID="mascot-frame">
+          <Image
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel="Orangutan holding an orange"
+            source={require('../../../assets/mascot-home.jpg')}
+            resizeMode="contain"
+            style={styles.mascot}
+          />
+        </View>
         <Button label="PLAY" emphasis="primary" onPress={onPlay} testID="play-button" />
       </View>
     </Screen>
@@ -50,5 +52,12 @@ const styles = StyleSheet.create({
   settingsRow: { alignItems: 'flex-end' },
   settingsButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  mascot: { width: '100%', maxWidth: 320, aspectRatio: mascotAspectRatio },
+  // The frame owns the size. Image would otherwise lay out at the file's 1152px height and push PLAY off the screen.
+  mascotFrame: {
+    width: '100%',
+    maxWidth: 320,
+    aspectRatio: mascotAspectRatio,
+    flexShrink: 1,
+  },
+  mascot: { width: '100%', height: '100%' },
 });
