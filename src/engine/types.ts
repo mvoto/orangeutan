@@ -5,3 +5,10 @@ export type Symbol = 'monkey' | 'orange';
 export type Cell = Symbol | 'empty';
 
 export type Line = 'row' | 'column';
+
+/** A 4×4 Puzzle. Givens are locked Symbols; null cells are for the player. */
+export type Puzzle = {
+  readonly size: 4;
+  readonly edgeClues: readonly [];
+  readonly givens: readonly (Symbol | null)[];
+};

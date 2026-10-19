@@ -1,3 +1,4 @@
 export { brokenLines } from './broken-lines';
 export type { BrokenLine } from './broken-lines';
-export type { Cell, Line, Symbol } from './types';
+export { cycleCell } from './cycle-cell';
+export type { Cell, Line, Puzzle, Symbol } from './types';

@@ -1,14 +1,18 @@
-import type { Cell, Line } from './types';
+import type { Cell, Line, Symbol } from './types';
+
+export type RuleName = 'no-three-in-a-row' | 'balance';
 
 export type BrokenLine = {
-  readonly rule: 'no-three-in-a-row';
+  readonly rule: RuleName;
   readonly line: Line;
   readonly index: number;
 };
 
 const size = 4;
 
-/** Rows and columns that already hold three identical Symbols in a row. */
+const half = size / 2;
+
+/** Rows and columns that already break no-three-in-a-row or balance. */
 export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
   const found: BrokenLine[] = [];
 
@@ -17,10 +21,23 @@ export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
       if (hasThreeInARow(cells, line, index)) {
         found.push({ rule: 'no-three-in-a-row', line, index });
       }
+      if (hasMoreThanHalf(cells, line, index)) {
+        found.push({ rule: 'balance', line, index });
+      }
     }
   }
 
   return found;
+}
+
+function hasMoreThanHalf(cells: readonly Cell[], line: Line, index: number): boolean {
+  const counts: Record<Symbol, number> = { monkey: 0, orange: 0 };
+  for (let offset = 0; offset < size; offset += 1) {
+    const cell = cellAt(cells, line, index, offset);
+    if (cell === 'empty') continue;
+    counts[cell] += 1;
+  }
+  return counts.monkey > half || counts.orange > half;
 }
 
 function hasThreeInARow(cells: readonly Cell[], line: Line, index: number): boolean {
