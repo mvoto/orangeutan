@@ -237,7 +237,7 @@ Each milestone is small, ends green (lint, typecheck, tests), and is started
 | 7   | Progression + persistence  | Current unsolved Level only, saved progress, versioned save schema with safe migrations. No replay.                            |
 | 8   | Pixel-art rewards          | Reveal animation and gallery. Art style **approved first**.                                                                    |
 | 9   | Helpers                    | Hint (logical next step with explanation). Undo and reset are not planned.                                                     |
-| 10  | Polish                     | Haptics, sound, accessibility, reduced motion.                                                                                  |
+| 10  | Polish                     | Haptics, sound, accessibility, reduced motion.                                                                                 |
 | 11  | Release                    | Final icon and splash, EAS builds, TestFlight / internal testing, store listing.                                               |
 
 ---
