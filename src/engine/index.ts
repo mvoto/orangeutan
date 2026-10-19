@@ -1,5 +1,6 @@
 export { brokenLines } from './broken-lines';
 export type { BrokenLine } from './broken-lines';
+export { cellIndex } from './cell-index';
 export { cycleCell } from './cycle-cell';
 export { levelOne } from './level-one';
 export { logicalSolution } from './logical-solution';

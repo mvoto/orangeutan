@@ -25,7 +25,12 @@ describe('4×4 rules with no Edge clues', () => {
           ....
         `),
       ),
-    ).toContainEqual({ rule: 'no-three-in-a-row', line: 'row', index: 0 });
+    ).toContainEqual({
+      rule: 'no-three-in-a-row',
+      line: 'row',
+      index: 0,
+      cellIndexes: [0, 1, 2, 3],
+    });
 
     expect(
       brokenLines(
@@ -36,7 +41,12 @@ describe('4×4 rules with no Edge clues', () => {
           ....
         `),
       ),
-    ).toContainEqual({ rule: 'no-three-in-a-row', line: 'column', index: 1 });
+    ).toContainEqual({
+      rule: 'no-three-in-a-row',
+      line: 'column',
+      index: 1,
+      cellIndexes: [1, 5, 9, 13],
+    });
 
     expect(
       brokenLines(
@@ -60,7 +70,7 @@ describe('4×4 rules with no Edge clues', () => {
           ....
         `),
       ),
-    ).toContainEqual({ rule: 'balance', line: 'row', index: 0 });
+    ).toContainEqual({ rule: 'balance', line: 'row', index: 0, cellIndexes: [0, 1, 2, 3] });
 
     expect(
       brokenLines(
@@ -71,7 +81,12 @@ describe('4×4 rules with no Edge clues', () => {
           .O..
         `),
       ),
-    ).toContainEqual({ rule: 'balance', line: 'column', index: 1 });
+    ).toContainEqual({
+      rule: 'balance',
+      line: 'column',
+      index: 1,
+      cellIndexes: [1, 5, 9, 13],
+    });
 
     expect(
       brokenLines(

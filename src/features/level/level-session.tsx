@@ -1,8 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import { cycleCell, levelOne } from '@/engine';
 import type { Cell } from '@/engine';
+
+import { levelSessionReducer, startingCells } from './level-session-state';
+import type { LevelSessionState } from './level-session-state';
 
 type LevelSession = {
   readonly cells: readonly Cell[];
@@ -11,17 +13,17 @@ type LevelSession = {
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
 
-function startingCells(): Cell[] {
-  return levelOne.givens.map((given): Cell => given ?? 'empty');
+function createSession(): LevelSessionState {
+  return { cells: startingCells() };
 }
 
 /** Placed Symbols live here so leaving Level 1 does not clear the grid. */
 export function LevelSessionProvider({ children }: PropsWithChildren): React.JSX.Element {
-  const [cells, setCells] = useState<readonly Cell[]>(startingCells);
+  const [state, dispatch] = useReducer(levelSessionReducer, null, createSession);
   const cycle = useCallback((index: number) => {
-    setCells((current) => cycleCell(levelOne, current, index));
+    dispatch({ type: 'cycle', index });
   }, []);
-  const session = useMemo(() => ({ cells, cycle }), [cells, cycle]);
+  const session = useMemo(() => ({ cells: state.cells, cycle }), [state.cells, cycle]);
 
   return <LevelSessionContext.Provider value={session}>{children}</LevelSessionContext.Provider>;
 }

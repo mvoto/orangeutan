@@ -1,28 +1,31 @@
-import type { Cell, Line, Symbol } from './types';
-
-export type RuleName = 'no-three-in-a-row' | 'balance';
+import { lineCellIndexes } from './cell-index';
+import { balance } from './rules/balance';
+import type { LineRule } from './rules/line-rule';
+import { noThreeInARow } from './rules/no-three-in-a-row';
+import type { Cell, Line } from './types';
 
 export type BrokenLine = {
-  readonly rule: RuleName;
+  readonly rule: string;
   readonly line: Line;
   readonly index: number;
+  readonly cellIndexes: readonly number[];
 };
+
+const rules: readonly LineRule[] = [noThreeInARow, balance];
 
 const size = 4;
 
-const half = size / 2;
-
-/** Rows and columns that already break no-three-in-a-row or balance. */
 export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
   const found: BrokenLine[] = [];
 
   for (const line of ['row', 'column'] as const) {
     for (let index = 0; index < size; index += 1) {
-      if (hasThreeInARow(cells, line, index)) {
-        found.push({ rule: 'no-three-in-a-row', line, index });
-      }
-      if (hasMoreThanHalf(cells, line, index)) {
-        found.push({ rule: 'balance', line, index });
+      const cellIndexes = lineCellIndexes(line, index, size);
+      const lineCells = cellsOn(cells, cellIndexes, line, index);
+      for (const rule of rules) {
+        if (rule.broken(lineCells)) {
+          found.push({ rule: rule.name, line, index, cellIndexes });
+        }
       }
     }
   }
@@ -30,31 +33,17 @@ export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
   return found;
 }
 
-function hasMoreThanHalf(cells: readonly Cell[], line: Line, index: number): boolean {
-  const counts: Record<Symbol, number> = { monkey: 0, orange: 0 };
-  for (let offset = 0; offset < size; offset += 1) {
-    const cell = cellAt(cells, line, index, offset);
-    if (cell === 'empty') continue;
-    counts[cell] += 1;
-  }
-  return counts.monkey > half || counts.orange > half;
-}
-
-function hasThreeInARow(cells: readonly Cell[], line: Line, index: number): boolean {
-  for (let start = 0; start <= size - 3; start += 1) {
-    const first = cellAt(cells, line, index, start);
-    const second = cellAt(cells, line, index, start + 1);
-    const third = cellAt(cells, line, index, start + 2);
-    if (first !== 'empty' && first === second && second === third) return true;
-  }
-  return false;
-}
-
-function cellAt(cells: readonly Cell[], line: Line, index: number, offset: number): Cell {
-  const position = line === 'row' ? index * size + offset : offset * size + index;
-  const cell = cells[position];
-  if (cell === undefined) {
-    throw new Error(`Missing cell at ${line} ${index} offset ${offset}`);
-  }
-  return cell;
+function cellsOn(
+  cells: readonly Cell[],
+  cellIndexes: readonly number[],
+  line: Line,
+  index: number,
+): readonly Cell[] {
+  return cellIndexes.map((position) => {
+    const cell = cells[position];
+    if (cell === undefined) {
+      throw new Error(`Missing cell at ${line} ${index}`);
+    }
+    return cell;
+  });
 }

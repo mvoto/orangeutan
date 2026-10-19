@@ -4,15 +4,18 @@ import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
 import { renderWithTheme } from '@/test/render-with-theme';
+import type { Theme } from '@/theme';
+import { treehouseTheme } from '@/theme';
 
 import { LevelScreen } from '../level-screen';
 import { LevelSessionProvider } from '../level-session';
 
-function renderLevel(): ReturnType<typeof renderWithTheme> {
+function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
   return renderWithTheme(
     <LevelSessionProvider>
-      <LevelScreen />
+      <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
+    theme === undefined ? {} : { theme },
   );
 }
 
@@ -38,7 +41,8 @@ describe('Level 1', () => {
   });
 
   it('outlines every cell in a broken row', async () => {
-    await renderLevel();
+    expect(treehouseTheme.colors.border).toBe(treehouseTheme.colors.textPrimary);
+    await renderLevel(treehouseTheme);
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 3, column 1, empty' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Row 3, column 2, empty' }));
@@ -50,20 +54,21 @@ describe('Level 1', () => {
       'Row 3, column 3, monkey',
       'Row 3, column 4, empty',
     ]) {
-      expect(screen.getByRole('button', { name })).toHaveProp('accessibilityHint', 'Breaks a rule');
+      expect(screen.getByRole('button', { name })).toHaveStyle({ borderStyle: 'dashed' });
     }
-    expect(screen.getByRole('button', { name: 'Row 4, column 1, empty' })).not.toHaveProp(
-      'accessibilityHint',
-    );
+    expect(screen.getByRole('button', { name: 'Row 4, column 1, empty' })).toHaveStyle({
+      borderStyle: 'solid',
+    });
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 3, column 3, monkey' }));
-    expect(screen.getByRole('button', { name: 'Row 3, column 1, monkey' })).not.toHaveProp(
-      'accessibilityHint',
-    );
+    expect(screen.getByRole('button', { name: 'Row 3, column 1, monkey' })).toHaveStyle({
+      borderStyle: 'solid',
+    });
   });
 
   it('outlines every cell in a broken column', async () => {
-    await renderLevel();
+    expect(treehouseTheme.colors.border).toBe(treehouseTheme.colors.textPrimary);
+    await renderLevel(treehouseTheme);
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 2, column 1, empty' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Row 2, column 1, monkey' }));
@@ -78,11 +83,11 @@ describe('Level 1', () => {
       'Row 3, column 1, orange',
       'Row 4, column 1, orange',
     ]) {
-      expect(screen.getByRole('button', { name })).toHaveProp('accessibilityHint', 'Breaks a rule');
+      expect(screen.getByRole('button', { name })).toHaveStyle({ borderStyle: 'dashed' });
     }
-    expect(screen.getByRole('button', { name: 'Row 3, column 2, empty' })).not.toHaveProp(
-      'accessibilityHint',
-    );
+    expect(screen.getByRole('button', { name: 'Row 3, column 2, empty' })).toHaveStyle({
+      borderStyle: 'solid',
+    });
   });
 
   it('returns to the PLAY screen and keeps placed Symbols for the session', async () => {

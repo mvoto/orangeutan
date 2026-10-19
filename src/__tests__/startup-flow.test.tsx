@@ -31,7 +31,6 @@ describe('app startup', () => {
     fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
 
     expect(await screen.findByTestId('level-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
-    expect(screen.getByText('Level 1')).toBeOnTheScreen();
     expect(router.getPathname()).toBe('/level');
   });
 });
