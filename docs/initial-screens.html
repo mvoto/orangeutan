@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orangeutan — initial screens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --page: #f6f1ea;
+        --ink: #2a211c;
+        --muted: #6d6258;
+        --line: #e4d9cc;
+        --card: #fffdfb;
+        --background: #efe4d8;
+        --surface: #fbf6f0;
+        --primary: #7a5340;
+        --text: #2a211c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--ink);
+        font-family: 'Source Sans 3', sans-serif;
+        line-height: 1.45;
+      }
+      header,
+      footer {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 36px 24px 8px;
+      }
+      footer {
+        padding-bottom: 40px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      h1,
+      h2 {
+        font-family: Nunito, sans-serif;
+        margin: 0;
+        letter-spacing: -0.03em;
+      }
+      h1 {
+        font-size: 34px;
+      }
+      h2 {
+        font-size: 22px;
+      }
+      p {
+        margin: 0;
+      }
+      .kicker {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .lede {
+        max-width: 70ch;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      main {
+        max-width: 920px;
+        margin: 20px auto 28px;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      article {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .stage {
+        padding: 18px 16px 12px;
+      }
+      .why {
+        margin-top: 8px;
+        font-size: 15px;
+        color: var(--muted);
+      }
+      .phone {
+        height: 640px;
+        margin: 0 16px 16px;
+        padding: 16px;
+        border-radius: 28px;
+        background: var(--background);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        box-shadow: inset 0 0 0 1px rgb(42 33 28 / 8%);
+      }
+      .center {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+      }
+      .logo-mark {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 16px;
+        border: 2px dashed var(--text);
+        border-radius: 20px;
+        background: var(--surface);
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        line-height: 18px;
+      }
+      .wordmark {
+        font-family: Nunito, sans-serif;
+        font-size: 34px;
+        line-height: 40px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgb(42 33 28 / 25%);
+        border-top-color: var(--text);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .settings-row {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .settings {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--text);
+        font-family: 'Source Sans 3', sans-serif;
+        font-size: 16px;
+        line-height: 22px;
+        cursor: default;
+      }
+      .mascot {
+        width: 100%;
+        max-width: 280px;
+        aspect-ratio: 768 / 1152;
+        object-fit: contain;
+      }
+      .play {
+        position: relative;
+        min-height: 44px;
+        min-width: 148px;
+        padding: 12px 28px;
+        border: 2px solid var(--primary);
+        border-radius: 999px;
+        background: var(--primary);
+        color: #fff;
+        font-family: 'Source Sans 3', sans-serif;
+        font-size: 16px;
+        line-height: 20px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: default;
+        overflow: hidden;
+      }
+      .play:active {
+        transform: scale(0.96);
+      }
+      .play.breathe {
+        animation: breathe 1.8s ease-in-out infinite;
+        box-shadow: 0 7px 0 rgb(42 33 28 / 22%);
+      }
+      .play.shine::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          105deg,
+          transparent 32%,
+          rgb(255 255 255 / 45%) 50%,
+          transparent 68%
+        );
+        transform: translateX(-130%);
+        animation: shine 2.8s ease-in-out infinite;
+      }
+      .play.lift {
+        box-shadow:
+          inset 0 1px 0 rgb(255 255 255 / 35%),
+          0 8px 0 rgb(42 33 28 / 24%);
+        animation: halo 2.2s ease-in-out infinite;
+      }
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      @keyframes shine {
+        0%,
+        42% {
+          transform: translateX(-130%);
+        }
+        72%,
+        100% {
+          transform: translateX(130%);
+        }
+      }
+      @keyframes halo {
+        0%,
+        100% {
+          box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / 35%),
+            0 8px 0 rgb(42 33 28 / 24%);
+        }
+        50% {
+          box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / 45%),
+            0 8px 0 rgb(42 33 28 / 24%),
+            0 0 0 10px rgb(122 83 64 / 18%);
+        }
+      }
+      .choices {
+        max-width: 920px;
+        margin: 0 auto 28px;
+        padding: 0 24px;
+      }
+      .choices h2 {
+        font-size: 26px;
+      }
+      .choice-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 16px;
+      }
+      .pad {
+        min-height: 180px;
+        margin: 0 16px 16px;
+        border-radius: 28px;
+        background: var(--background);
+        display: grid;
+        place-items: center;
+        box-shadow: inset 0 0 0 1px rgb(42 33 28 / 8%);
+      }
+      .home-center {
+        gap: 24px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .play.breathe,
+        .play.shine::after,
+        .play.lift {
+          animation: none;
+        }
+      }
+      @media (max-width: 800px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .mascot {
+          max-width: 220px;
+        }
+        .choice-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p class="kicker">Initial screens</p>
+      <h1>Loading, then home</h1>
+      <p class="lede">
+        Treehouse light, Nunito for the wordmark, Source Sans 3 for the button. The logo is still
+        the dashed placeholder. The center is the orangutan holding a smiling orange from the issue.
+        PLAY and Settings do nothing.
+      </p>
+    </header>
+    <main>
+      <article>
+        <div class="stage">
+          <p class="kicker">First</p>
+          <h2>Loading</h2>
+          <p class="why">Name and logo placeholder on the same cream as the game.</p>
+        </div>
+        <div class="phone" aria-label="Loading screen">
+          <div class="center">
+            <div>
+              <div class="logo-mark">logo</div>
+              <div class="wordmark">Orangeutan</div>
+            </div>
+            <div class="spinner" role="progressbar" aria-label="Loading"></div>
+          </div>
+        </div>
+      </article>
+      <article>
+        <div class="stage">
+          <p class="kicker">Then</p>
+          <h2>Home</h2>
+          <p class="why">The issue drawing sits above the Lift button: a raised edge and a cocoa ring.</p>
+        </div>
+        <div class="phone" aria-label="Home screen">
+          <div class="settings-row">
+            <button class="settings" type="button" aria-label="Settings">⚙</button>
+          </div>
+          <div class="center home-center">
+            <img class="mascot" src="../assets/mascot-home.jpg" alt="Orangutan holding an orange" />
+            <button class="play lift" type="button">PLAY</button>
+          </div>
+        </div>
+      </article>
+    </main>
+    <section class="choices">
+      <p class="kicker">Not in the app yet</p>
+      <h2>PLAY treatments</h2>
+      <p class="lede">Same cocoa and white type. Pick one and it can go on the home screen.</p>
+      <div class="choice-row">
+        <article>
+          <div class="stage">
+            <p class="kicker">A</p>
+            <h2>Breathe</h2>
+            <p class="why">A slow scale and a solid shadow, the usual “tap me” pulse.</p>
+          </div>
+          <div class="pad"><button class="play breathe" type="button">PLAY</button></div>
+        </article>
+        <article>
+          <div class="stage">
+            <p class="kicker">B</p>
+            <h2>Shine</h2>
+            <p class="why">A soft light sweeps across the pill every few seconds.</p>
+          </div>
+          <div class="pad"><button class="play shine" type="button">PLAY</button></div>
+        </article>
+        <article>
+          <div class="stage">
+            <p class="kicker">C</p>
+            <h2>Lift</h2>
+            <p class="why">A raised edge, with a cocoa ring that fades in and out.</p>
+          </div>
+          <div class="pad"><button class="play lift" type="button">PLAY</button></div>
+        </article>
+      </div>
+    </section>
+    <footer>Lift is the PLAY treatment on the home screen. Breathe and Shine stay here for comparison.</footer>
+  </body>
+</html>
