@@ -8,8 +8,12 @@ const noAction = (): void => undefined;
 /** Width / height of assets/mascot-home.jpg, the issue's chosen center drawing. */
 const mascotAspectRatio = 768 / 1152;
 
-/** First screen after loading. PLAY and Settings do nothing until later milestones. */
-export function HomeScreen(): React.JSX.Element {
+type HomeScreenProps = {
+  onPlay?: () => void;
+};
+
+/** First screen after loading. Settings waits for a later milestone. */
+export function HomeScreen({ onPlay = noAction }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
 
   return (
@@ -36,7 +40,7 @@ export function HomeScreen(): React.JSX.Element {
           resizeMode="contain"
           style={styles.mascot}
         />
-        <Button label="PLAY" emphasis="primary" onPress={noAction} testID="play-button" />
+        <Button label="PLAY" emphasis="primary" onPress={onPlay} testID="play-button" />
       </View>
     </Screen>
   );
