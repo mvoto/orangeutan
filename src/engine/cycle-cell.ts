@@ -1,3 +1,4 @@
+import { cellAt } from './cell-at';
 import type { Cell, Puzzle } from './types';
 
 /** Advance a player cell. A Given stays as it was. */
@@ -6,11 +7,7 @@ export function cycleCell(puzzle: Puzzle, cells: readonly Cell[], index: number)
   if (given !== null && given !== undefined) return cells;
 
   const next = cells.slice();
-  const current = next[index];
-  if (current === undefined) {
-    throw new Error(`Missing cell ${index}`);
-  }
-  next[index] = nextCell(current);
+  next[index] = nextCell(cellAt(next, index));
   return next;
 }
 

@@ -1,6 +1,22 @@
-import { brokenLines, cycleCell, levelOne, levelTwo, logicalSolution } from '../index';
+import {
+  brokenLines,
+  cellsFromGivens,
+  cycleCell,
+  levelOne,
+  levelTwo,
+  logicalSolution,
+} from '../index';
+import type { BrokenLine } from '../index';
+import { balance } from '../rules/balance';
+import type { LineRule } from '../rules/line-rule';
+import { noThreeInARow } from '../rules/no-three-in-a-row';
 
 import type { Cell } from '../types';
+
+type NameIsRule = string extends LineRule['name'] ? false : true;
+type BrokenIsRule = string extends BrokenLine['rule'] ? false : true;
+const nameIsRule: NameIsRule = true;
+const brokenIsRule: BrokenIsRule = true;
 
 function grid(pattern: string): Cell[] {
   return pattern
@@ -15,6 +31,11 @@ function grid(pattern: string): Cell[] {
 }
 
 describe('4×4 rules with no Edge clues', () => {
+  it('names a broken line with a rule, not an open string', () => {
+    expect(nameIsRule).toBe(true);
+    expect(brokenIsRule).toBe(true);
+  });
+
   it('breaks a row or column with three identical Symbols in a row', () => {
     expect(
       brokenLines(
@@ -100,6 +121,20 @@ describe('4×4 rules with no Edge clues', () => {
     ).toEqual([]);
   });
 
+  it('reports a missing cell as a programmer bug, not a legal line', () => {
+    const row = grid(`
+      MMM.
+      ....
+      ....
+      ....
+    `);
+    delete row[1];
+
+    expect(() => noThreeInARow.broken(row.slice(0, 4))).toThrow('Missing cell 1');
+    expect(() => balance.broken(row.slice(0, 4))).toThrow('Missing cell 1');
+    expect(() => brokenLines(row)).toThrow('Missing cell 1');
+  });
+
   it('keeps a Given in place when that cell is cycled', () => {
     const givens = [
       'monkey',
@@ -120,7 +155,7 @@ describe('4×4 rules with no Edge clues', () => {
       null,
     ] as const;
     const puzzle = { size: 4 as const, edgeClues: [] as const, givens };
-    const cells = givens.map((given) => given ?? 'empty');
+    const cells = cellsFromGivens(puzzle);
 
     expect(cycleCell(puzzle, cells, 0)).toEqual(cells);
     expect(cycleCell(puzzle, cells, 11)).toEqual(cells);
@@ -193,25 +228,28 @@ describe('4×4 rules with no Edge clues', () => {
     });
 
     expect(logicalSolution(levelOne)).toEqual({
-      count: 1,
-      cells: [
-        'orange',
-        'orange',
-        'monkey',
-        'monkey',
-        'orange',
-        'orange',
-        'monkey',
-        'monkey',
-        'monkey',
-        'monkey',
-        'orange',
-        'orange',
-        'monkey',
-        'monkey',
-        'orange',
-        'orange',
-      ],
+      ok: true,
+      value: {
+        count: 1,
+        cells: [
+          'orange',
+          'orange',
+          'monkey',
+          'monkey',
+          'orange',
+          'orange',
+          'monkey',
+          'monkey',
+          'monkey',
+          'monkey',
+          'orange',
+          'orange',
+          'monkey',
+          'monkey',
+          'orange',
+          'orange',
+        ],
+      },
     });
   });
 });
@@ -226,8 +264,10 @@ describe('Level 2', () => {
     expect(levelOne.edgeClues).toEqual([]);
 
     expect(logicalSolution(levelTwo)).toEqual({
-      count: 1,
-      cells: grid(`
+      ok: true,
+      value: {
+        count: 1,
+        cells: grid(`
         MOMOMO
         OMOMOM
         MOMOMO
@@ -235,6 +275,7 @@ describe('Level 2', () => {
         MOMOMO
         OMOMOM
       `),
+      },
     });
   });
 });

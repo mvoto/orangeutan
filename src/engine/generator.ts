@@ -91,8 +91,8 @@ function carve(
 
 function matches(puzzle: Puzzle, solution: readonly Cell[]): boolean {
   const solved = logicalSolution(puzzle);
-  if (solved === null) return false;
-  return solved.cells.every((cell, index) => cell === solution[index]);
+  if (!solved.ok) return false;
+  return solved.value.cells.every((cell, index) => cell === solution[index]);
 }
 
 const rowCatalog = new Map<number, Symbol[][]>();
