@@ -1,17 +1,21 @@
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import Storage from 'expo-sqlite/kv-store';
 import { Share } from 'react-native';
 
 import CelebrationRoute from '@/app/celebration';
 import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
-import { deviceSaveStore } from '@/services/save-store';
+import { logicalSolution } from '@/engine';
+import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
 import type { Theme } from '@/theme';
 import { treehouseTheme } from '@/theme';
 
 import { LevelScreen } from '../level-screen';
 import { LevelSessionProvider } from '../level-session';
+import { encodeSave } from '../save';
+import { levelSequence } from '../sequence';
 
 type CelebrationPlayer = {
   muted: boolean;
@@ -203,11 +207,64 @@ describe('Level 1', () => {
     expect(screen.getByText('Edge clues')).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Row 1, column 1, orange' })).not.toBeOnTheScreen();
 
+    await fireEvent.press(screen.getByRole('button', { name: 'Row 6, column 6, empty' }));
+
+    expect(
+      await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
+    ).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Home' })).not.toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(await screen.findByTestId('level-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.queryByText('Score')).not.toBeOnTheScreen();
+  });
+
+  it('offers Home and the Score after the last Level', async () => {
     const share = jest
       .spyOn(Share, 'share')
       .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
+    const last = levelSequence[levelSequence.length - 1];
+    const solution = logicalSolution(last!);
+    const open = last!.givens.findIndex((given) => given === null);
+    const symbol = solution?.cells[open];
+    if (
+      solution === null ||
+      last === undefined ||
+      open < 0 ||
+      symbol === undefined ||
+      symbol === 'empty'
+    ) {
+      throw new Error('The last Level has no open cell');
+    }
+    const cells = solution.cells.map((cell, index) => (index === open ? 'empty' : cell));
+    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells }));
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Row 6, column 6, empty' }));
+    await renderRouter(
+      {
+        _layout: RootLayout,
+        home: HomeRoute,
+        level: LevelRoute,
+        celebration: CelebrationRoute,
+      },
+      { initialUrl: '/home' },
+    );
+
+    await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
+    const row = Math.floor(open / last.size) + 1;
+    const column = (open % last.size) + 1;
+    const marks = ['empty', 'monkey', 'orange'] as const;
+    const taps = symbol === 'monkey' ? 1 : 2;
+    for (let tap = 0; tap < taps; tap += 1) {
+      await fireEvent.press(
+        await screen.findByRole(
+          'button',
+          { name: `Row ${row}, column ${column}, ${marks[tap]}` },
+          { timeout: 3000 },
+        ),
+      );
+    }
 
     expect(
       await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
@@ -220,10 +277,10 @@ describe('Level 1', () => {
     expect(await screen.findByTestId('home-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
     expect(screen.getByText('Score')).toBeOnTheScreen();
-    expect(screen.getByText('2')).toBeOnTheScreen();
+    expect(screen.getByText(String(levelSequence.length))).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Share' }));
-    expect(share).toHaveBeenCalledWith({ message: '2' });
+    expect(share).toHaveBeenCalledWith({ message: String(levelSequence.length) });
   });
 });
 
