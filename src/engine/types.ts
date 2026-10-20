@@ -17,7 +17,7 @@ export type EdgeClue = {
 
 /** A Puzzle. Givens are locked Symbols; null cells are for the player. */
 export type Puzzle = {
-  readonly size: 4 | 6;
+  readonly size: 4 | 6 | 8;
   readonly edgeClues: readonly EdgeClue[];
   readonly givens: readonly (Symbol | null)[];
 };
