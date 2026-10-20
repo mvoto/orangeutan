@@ -183,6 +183,8 @@ describe('Level 1', () => {
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeOnTheScreen();
     expect(mockCelebrationPlayer.muted).toBe(true);
     expect(mockCelebrationPlayer.play).toHaveBeenCalled();
+    expect(screen.queryByTestId('level-screen')).not.toBeOnTheScreen();
+    expect(screen.queryByText('Edge clues')).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();

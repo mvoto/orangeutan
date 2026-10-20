@@ -5,13 +5,12 @@ import { LevelScreen, useLevelSession } from '@/features/level';
 
 export default function LevelRoute(): React.JSX.Element {
   const router = useRouter();
-  const { celebrate, advance } = useLevelSession();
+  const { celebrate } = useLevelSession();
 
   useEffect(() => {
     if (!celebrate) return;
-    advance();
     router.replace('/celebration');
-  }, [celebrate, advance, router]);
+  }, [celebrate, router]);
 
   return <LevelScreen onBack={() => router.back()} />;
 }
