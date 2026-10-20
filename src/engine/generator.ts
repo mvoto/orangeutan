@@ -1,34 +1,45 @@
 import { brokenLines } from './broken-lines';
 import { logicalSolution } from './logical-solution';
+import type { Result } from './result';
+import { fail, ok } from './result';
 import { createRng } from './rng';
 import type { Rng } from './rng';
 import type { Cell, EdgeClue, Puzzle, Symbol } from './types';
 
 const symbols: readonly Symbol[] = ['monkey', 'orange'];
 /** A miss draws another grid from the same seed instead of repeating one pattern. */
-const attempts = 40;
+const defaultAttempts = 40;
 /** Trying every valid row explodes the search. Eight candidates, then another grid. */
 const rowSamples = 8;
+
+export type PuzzleMiss = { readonly reason: 'miss' };
 
 /**
  * A seeded Puzzle of the requested size. Givens are removed only while logic
  * still forces the same completion, so more Givens is an easier Puzzle.
+ * A seed that cannot produce one is a miss. A Given count that cannot fit throws.
+ * `attemptLimit` is how many grids to try before that miss. The pack uses the default.
  */
-export function generatePuzzle(seed: number, size: 6 | 8, givenCount: number): Puzzle {
+export function generatePuzzle(
+  seed: number,
+  size: 6 | 8,
+  givenCount: number,
+  attemptLimit = defaultAttempts,
+): Result<Puzzle, PuzzleMiss> {
   const cellCount = size * size;
   if (givenCount < 0 || givenCount > cellCount) {
     throw new Error(`Given count ${givenCount} does not fit a ${size}×${size}`);
   }
 
   const rng = createRng(seed);
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
+  for (let attempt = 0; attempt < attemptLimit; attempt += 1) {
     const solution = fullGrid(rng, size);
     if (solution === null) continue;
     const puzzle = carve(rng, size, solution, givenCount);
-    if (puzzle !== null) return puzzle;
+    if (puzzle !== null) return ok(puzzle);
   }
 
-  throw new Error(`No ${size}×${size} Puzzle with ${givenCount} Givens from seed ${seed}`);
+  return fail({ reason: 'miss' });
 }
 
 function fullGrid(rng: Rng, size: 6 | 8): Cell[] | null {
