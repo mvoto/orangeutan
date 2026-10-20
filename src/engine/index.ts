@@ -1,6 +1,9 @@
 export { brokenLines } from './broken-lines';
 export type { BrokenLine } from './broken-lines';
 export { cellIndex } from './cell-index';
+export { generatePuzzle } from './generator';
+export { createRng } from './rng';
+export type { Rng } from './rng';
 export { cycleCell } from './cycle-cell';
 export { levelOne } from './level-one';
 export { levelTwo } from './level-two';

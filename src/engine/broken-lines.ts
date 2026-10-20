@@ -42,7 +42,7 @@ export function brokenLines(
 
 function boardSize(cellCount: number): number {
   const size = Math.sqrt(cellCount);
-  if (size !== 4 && size !== 6) {
+  if (size !== 4 && size !== 6 && size !== 8) {
     throw new Error(`Unsupported board size ${cellCount}`);
   }
   return size;
