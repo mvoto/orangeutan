@@ -81,6 +81,19 @@ describe('resume', () => {
     expect(screen.queryByText('Edge clues')).not.toBeOnTheScreen();
   });
 
+  it('does not reopen a finished Level', async () => {
+    const levelTwo = levelSessionReducer(startingState(), { type: 'advance' });
+    const solved = levelSessionReducer(levelTwo, { type: 'cycle', index: 35 });
+    Storage.setItemSync(saveKey, encodeSave(solved));
+
+    await renderRouter(routes, { initialUrl: '/home' });
+
+    expect(await screen.findByText('Score', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.getByText('2')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
+    expect(screen.queryByTestId('level-screen')).not.toBeOnTheScreen();
+  });
+
   it('does not open a solved Level 1', async () => {
     Storage.setItemSync(saveKey, encodeSave(solvedLevelOne));
 

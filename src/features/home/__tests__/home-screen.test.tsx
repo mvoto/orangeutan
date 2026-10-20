@@ -9,6 +9,7 @@ describe('<HomeScreen />', () => {
     await renderWithTheme(<HomeScreen />);
 
     expect(screen.getByRole('button', { name: 'PLAY' })).toBeOnTheScreen();
+    expect(screen.queryByText('Score')).not.toBeOnTheScreen();
   });
 
   it('shows a Settings control', async () => {

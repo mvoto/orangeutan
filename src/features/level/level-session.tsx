@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import { isSolved, levelOne } from '@/engine';
+import { isSolved } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
 import type { SaveStore } from '@/services/save-store';
 
 import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionAction, LevelSessionState } from './level-session-state';
 import { encodeSave, openSave } from './save';
+import { levelNumber, nextLevel } from './sequence';
 
 type StoredSession = LevelSessionState & { readonly preserveDocument: boolean };
 
@@ -15,8 +16,12 @@ type LevelSession = {
   readonly puzzle: Puzzle;
   readonly cells: readonly Cell[];
   readonly solved: boolean;
-  /** True only when Level 1 is solved. Level 2's ending is a later Level. */
+  /** True when the current Puzzle is solved. The Celebration is the only way forward. */
   readonly celebrate: boolean;
+  /** True when the solved Puzzle is the last Level. */
+  readonly finished: boolean;
+  /** How many Levels are solved. Present only when every Level is solved. */
+  readonly score: number | null;
   readonly cycle: (index: number) => void;
   readonly advance: () => void;
 };
@@ -58,10 +63,21 @@ export function LevelSessionProvider({
     dispatch({ type: 'advance' });
   }, []);
   const solved = isSolved(state.puzzle, state.cells);
-  const celebrate = solved && state.puzzle === levelOne;
+  const finished = solved && nextLevel(state.puzzle) === null;
+  const celebrate = solved;
+  const score = finished ? levelNumber(state.puzzle) : null;
   const session = useMemo(
-    () => ({ puzzle: state.puzzle, cells: state.cells, solved, celebrate, cycle, advance }),
-    [state.puzzle, state.cells, solved, celebrate, cycle, advance],
+    () => ({
+      puzzle: state.puzzle,
+      cells: state.cells,
+      solved,
+      celebrate,
+      finished,
+      score,
+      cycle,
+      advance,
+    }),
+    [state.puzzle, state.cells, solved, celebrate, finished, score, cycle, advance],
   );
 
   return <LevelSessionContext.Provider value={session}>{children}</LevelSessionContext.Provider>;

@@ -1,4 +1,5 @@
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { Share } from 'react-native';
 
 import CelebrationRoute from '@/app/celebration';
 import HomeRoute from '@/app/home';
@@ -202,9 +203,27 @@ describe('Level 1', () => {
     expect(screen.getByText('Edge clues')).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Row 1, column 1, orange' })).not.toBeOnTheScreen();
 
+    const share = jest
+      .spyOn(Share, 'share')
+      .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
+
     await fireEvent.press(screen.getByRole('button', { name: 'Row 6, column 6, empty' }));
-    expect(screen.getByTestId('level-screen')).toBeOnTheScreen();
-    expect(screen.queryByTestId('celebration-screen')).not.toBeOnTheScreen();
+
+    expect(
+      await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
+    ).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Home' })).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Next' })).not.toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Home' }));
+
+    expect(await screen.findByTestId('home-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
+    expect(screen.getByText('Score')).toBeOnTheScreen();
+    expect(screen.getByText('2')).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Share' }));
+    expect(share).toHaveBeenCalledWith({ message: '2' });
   });
 });
 

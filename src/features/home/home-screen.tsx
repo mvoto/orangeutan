@@ -9,11 +9,20 @@ const noAction = (): void => undefined;
 const mascotAspectRatio = 768 / 1152;
 
 type HomeScreenProps = {
-  onPlay?: () => void;
+  readonly onPlay?: () => void;
+  /** Every Level is solved, so PLAY stays gone and the Score is visible. */
+  readonly finished?: boolean;
+  readonly score?: number | null;
+  readonly onShare?: () => void;
 };
 
 /** First screen after loading. Settings waits for a later milestone. */
-export function HomeScreen({ onPlay = noAction }: HomeScreenProps): React.JSX.Element {
+export function HomeScreen({
+  onPlay = noAction,
+  finished = false,
+  score = null,
+  onShare = noAction,
+}: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
 
   return (
@@ -42,7 +51,15 @@ export function HomeScreen({ onPlay = noAction }: HomeScreenProps): React.JSX.El
             style={styles.mascot}
           />
         </View>
-        <Button label="PLAY" emphasis="primary" onPress={onPlay} testID="play-button" />
+        {finished ? (
+          <>
+            <AppText>Score</AppText>
+            <AppText>{score}</AppText>
+            <Button label="Share" emphasis="primary" onPress={onShare} />
+          </>
+        ) : (
+          <Button label="PLAY" emphasis="primary" onPress={onPlay} testID="play-button" />
+        )}
       </View>
     </Screen>
   );
