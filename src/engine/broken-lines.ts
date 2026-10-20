@@ -2,7 +2,7 @@ import { lineCellIndexes } from './cell-index';
 import { balance } from './rules/balance';
 import type { LineRule } from './rules/line-rule';
 import { noThreeInARow } from './rules/no-three-in-a-row';
-import type { Cell, Line } from './types';
+import type { Cell, EdgeClue, Line } from './types';
 
 export type BrokenLine = {
   readonly rule: string;
@@ -13,9 +13,11 @@ export type BrokenLine = {
 
 const rules: readonly LineRule[] = [noThreeInARow, balance];
 
-const size = 4;
-
-export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
+export function brokenLines(
+  cells: readonly Cell[],
+  edgeClues: readonly EdgeClue[] = [],
+): readonly BrokenLine[] {
+  const size = boardSize(cells.length);
   const found: BrokenLine[] = [];
 
   for (const line of ['row', 'column'] as const) {
@@ -30,7 +32,41 @@ export function brokenLines(cells: readonly Cell[]): readonly BrokenLine[] {
     }
   }
 
+  for (const clue of edgeClues) {
+    const broken = brokenEdgeClue(cells, clue, size);
+    if (broken !== null) found.push(broken);
+  }
+
   return found;
+}
+
+function boardSize(cellCount: number): number {
+  const size = Math.sqrt(cellCount);
+  if (size !== 4 && size !== 6) {
+    throw new Error(`Unsupported board size ${cellCount}`);
+  }
+  return size;
+}
+
+function brokenEdgeClue(cells: readonly Cell[], clue: EdgeClue, size: number): BrokenLine | null {
+  const left = cells[clue.a];
+  const right = cells[clue.b];
+  if (left === undefined || right === undefined) {
+    throw new Error(`Missing cell for Edge clue ${clue.a},${clue.b}`);
+  }
+  if (left === 'empty' || right === 'empty') return null;
+  const same = left === right;
+  const breaks = clue.relation === 'same' ? !same : same;
+  if (!breaks) return null;
+
+  const row = Math.floor(clue.a / size);
+  const sameRow = row === Math.floor(clue.b / size);
+  return {
+    rule: 'edge-clue',
+    line: sameRow ? 'row' : 'column',
+    index: sameRow ? row : clue.a % size,
+    cellIndexes: [clue.a, clue.b],
+  };
 }
 
 function cellsOn(
