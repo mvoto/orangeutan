@@ -6,8 +6,10 @@ import type { Cell, Puzzle } from '@/engine';
 import type { SaveStore } from '@/services/save-store';
 
 import { levelSessionReducer, startingState } from './level-session-state';
-import type { LevelSessionState } from './level-session-state';
-import { decodeSave, encodeSave } from './save';
+import type { LevelSessionAction, LevelSessionState } from './level-session-state';
+import { encodeSave, openSave } from './save';
+
+type StoredSession = LevelSessionState & { readonly preserveDocument: boolean };
 
 type LevelSession = {
   readonly puzzle: Puzzle;
@@ -21,12 +23,17 @@ type LevelSession = {
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
 
-function readSession(store: SaveStore): LevelSessionState {
+function readSession(store: SaveStore): StoredSession {
   try {
-    return decodeSave(store.read());
+    const opened = openSave(store.read());
+    return { ...opened.state, preserveDocument: opened.preserveDocument };
   } catch {
-    return startingState();
+    return { ...startingState(), preserveDocument: false };
   }
+}
+
+function storedSessionReducer(state: StoredSession, action: LevelSessionAction): StoredSession {
+  return { ...levelSessionReducer(state, action), preserveDocument: state.preserveDocument };
 }
 
 /** Placed Symbols live here so leaving the app does not clear the grid. */
@@ -34,9 +41,10 @@ export function LevelSessionProvider({
   children,
   store,
 }: PropsWithChildren<{ readonly store: SaveStore }>): React.JSX.Element {
-  const [state, dispatch] = useReducer(levelSessionReducer, store, readSession);
+  const [state, dispatch] = useReducer(storedSessionReducer, store, readSession);
 
   useEffect(() => {
+    if (state.preserveDocument) return;
     try {
       store.write(encodeSave(state));
     } catch {

@@ -2,7 +2,7 @@ import { isSolved, levelOne } from '@/engine';
 
 import type { LevelSessionState } from '../level-session-state';
 import { levelSessionReducer, startingState } from '../level-session-state';
-import { decodeSave, encodeSave } from '../save';
+import { decodeSave, encodeSave, openSave } from '../save';
 
 const solvedLevelOne: LevelSessionState = {
   puzzle: levelOne,
@@ -39,6 +39,27 @@ describe('save', () => {
     const changedGiven = encodeSave(startingState());
     const broken = changedGiven.replace('"orange"', '"monkey"');
     expect(decodeSave(broken)).toEqual(startingState());
+    expect(openSave('not json').preserveDocument).toBe(false);
+  });
+
+  it('leaves a newer save on disk', () => {
+    const newer = '{"version":2,"level":1,"cells":[]}';
+    const opened = openSave(newer);
+
+    expect(opened.state).toEqual(startingState());
+    expect(opened.preserveDocument).toBe(true);
+  });
+
+  it('stores the Level by its place in the sequence', () => {
+    const stranger = { ...levelOne, edgeClues: [] };
+
+    expect(JSON.parse(encodeSave(startingState())).level).toBe(1);
+    expect(
+      JSON.parse(encodeSave(levelSessionReducer(startingState(), { type: 'advance' }))).level,
+    ).toBe(2);
+    expect(() => encodeSave({ puzzle: stranger, cells: startingState().cells })).toThrow(
+      'Puzzle is not in the Level sequence',
+    );
   });
 
   it('retires a solved Level 1 as Level 2', () => {

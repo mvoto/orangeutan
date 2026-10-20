@@ -1,5 +1,7 @@
-import { cycleCell, levelOne, levelTwo } from '@/engine';
+import { cycleCell, levelOne } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
+
+import { nextLevel } from './sequence';
 
 export type LevelSessionState = {
   readonly puzzle: Puzzle;
@@ -24,9 +26,11 @@ export function levelSessionReducer(
   switch (action.type) {
     case 'cycle':
       return { ...state, cells: cycleCell(state.puzzle, state.cells, action.index) };
-    case 'advance':
-      if (state.puzzle === levelTwo) return state;
-      return { puzzle: levelTwo, cells: openGivens(levelTwo) };
+    case 'advance': {
+      const next = nextLevel(state.puzzle);
+      if (next === null) return state;
+      return { puzzle: next, cells: openGivens(next) };
+    }
     default: {
       const unexpected: never = action;
       throw new Error(`Unexpected level session action ${JSON.stringify(unexpected)}`);
