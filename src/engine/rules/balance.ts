@@ -1,3 +1,4 @@
+import { cellAt } from '../cell-at';
 import type { Symbol } from '../types';
 
 import type { LineRule } from './line-rule';
@@ -7,7 +8,8 @@ export const balance: LineRule = {
   broken(line) {
     const half = line.length / 2;
     const counts: Record<Symbol, number> = { monkey: 0, orange: 0 };
-    for (const cell of line) {
+    for (let index = 0; index < line.length; index += 1) {
+      const cell = cellAt(line, index);
       if (cell === 'empty') continue;
       counts[cell] += 1;
     }

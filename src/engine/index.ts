@@ -1,6 +1,8 @@
 export { brokenLines } from './broken-lines';
 export type { BrokenLine } from './broken-lines';
+export type { RuleName } from './rules/line-rule';
 export { cellIndex } from './cell-index';
+export { cellsFromGivens } from './cells-from-givens';
 export { generatePuzzle } from './generator';
 export { createRng } from './rng';
 export type { Rng } from './rng';
@@ -8,5 +10,6 @@ export { cycleCell } from './cycle-cell';
 export { levelOne } from './level-one';
 export { levelTwo } from './level-two';
 export { isSolved, logicalSolution } from './logical-solution';
-export type { LogicalSolution } from './logical-solution';
+export type { LogicalSolution, SolutionFailure } from './logical-solution';
+export type { Result } from './result';
 export type { Cell, EdgeClue, EdgeRelation, Line, Puzzle, Symbol } from './types';

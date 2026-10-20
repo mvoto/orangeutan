@@ -35,7 +35,7 @@ describe('shipped Levels', () => {
 
   it('gives every shipped Puzzle one logical solution', () => {
     for (const puzzle of levelSequence) {
-      expect(logicalSolution(puzzle)?.count).toBe(1);
+      expect(logicalSolution(puzzle)).toMatchObject({ ok: true, value: { count: 1 } });
     }
   });
 });

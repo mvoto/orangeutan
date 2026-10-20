@@ -225,19 +225,14 @@ describe('Level 1', () => {
       .spyOn(Share, 'share')
       .mockResolvedValue({ action: Share.sharedAction, activityType: undefined });
     const last = levelSequence[levelSequence.length - 1];
-    const solution = logicalSolution(last!);
-    const open = last!.givens.findIndex((given) => given === null);
-    const symbol = solution?.cells[open];
-    if (
-      solution === null ||
-      last === undefined ||
-      open < 0 ||
-      symbol === undefined ||
-      symbol === 'empty'
-    ) {
+    if (last === undefined) throw new Error('The sequence has no last Level');
+    const solution = logicalSolution(last);
+    const open = last.givens.findIndex((given) => given === null);
+    const symbol = solution.ok ? solution.value.cells[open] : undefined;
+    if (!solution.ok || open < 0 || symbol === undefined || symbol === 'empty') {
       throw new Error('The last Level has no open cell');
     }
-    const cells = solution.cells.map((cell, index) => (index === open ? 'empty' : cell));
+    const cells = solution.value.cells.map((cell, index) => (index === open ? 'empty' : cell));
     Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells }));
 
     await renderRouter(

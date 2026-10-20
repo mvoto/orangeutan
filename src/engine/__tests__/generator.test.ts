@@ -7,10 +7,11 @@ function givenCount(puzzle: Puzzle): number {
 
 function expectOneLogicalSolution(puzzle: Puzzle): void {
   const solution = logicalSolution(puzzle);
-  expect(solution).not.toBeNull();
-  expect(solution?.count).toBe(1);
-  expect(solution?.cells).toHaveLength(puzzle.size * puzzle.size);
-  expect(solution?.cells.some((cell) => cell === 'empty')).toBe(false);
+  expect(solution.ok).toBe(true);
+  if (!solution.ok) return;
+  expect(solution.value.count).toBe(1);
+  expect(solution.value.cells).toHaveLength(puzzle.size * puzzle.size);
+  expect(solution.value.cells.some((cell) => cell === 'empty')).toBe(false);
 }
 
 describe('generate a unique Puzzle', () => {

@@ -84,9 +84,10 @@ describe('resume', () => {
 
   it('does not reopen a finished Level', async () => {
     const last = levelSequence[levelSequence.length - 1];
-    const solution = logicalSolution(last!);
-    if (last === undefined || solution === null) throw new Error('The last Level has no solution');
-    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells: solution.cells }));
+    if (last === undefined) throw new Error('The last Level has no solution');
+    const solution = logicalSolution(last);
+    if (!solution.ok) throw new Error('The last Level has no solution');
+    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells: solution.value.cells }));
 
     await renderRouter(routes, { initialUrl: '/home' });
 
