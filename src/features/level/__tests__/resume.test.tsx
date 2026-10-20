@@ -4,12 +4,13 @@ import Storage from 'expo-sqlite/kv-store';
 import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
-import { levelOne } from '@/engine';
+import { levelOne, logicalSolution } from '@/engine';
 import { saveKey } from '@/services/save-store';
 
 import type { LevelSessionState } from '../level-session-state';
 import { levelSessionReducer, startingState } from '../level-session-state';
 import { encodeSave } from '../save';
+import { levelSequence } from '../sequence';
 
 const solvedLevelOne: LevelSessionState = {
   puzzle: levelOne,
@@ -82,14 +83,15 @@ describe('resume', () => {
   });
 
   it('does not reopen a finished Level', async () => {
-    const levelTwo = levelSessionReducer(startingState(), { type: 'advance' });
-    const solved = levelSessionReducer(levelTwo, { type: 'cycle', index: 35 });
-    Storage.setItemSync(saveKey, encodeSave(solved));
+    const last = levelSequence[levelSequence.length - 1];
+    const solution = logicalSolution(last!);
+    if (last === undefined || solution === null) throw new Error('The last Level has no solution');
+    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells: solution.cells }));
 
     await renderRouter(routes, { initialUrl: '/home' });
 
     expect(await screen.findByText('Score', {}, { timeout: 3000 })).toBeOnTheScreen();
-    expect(screen.getByText('2')).toBeOnTheScreen();
+    expect(screen.getByText(String(levelSequence.length))).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
     expect(screen.queryByTestId('level-screen')).not.toBeOnTheScreen();
   });
