@@ -100,7 +100,7 @@ two or three options where useful. No design token changes without approval.
 | Tests         | Jest 30 + `jest-expo`, React Native Testing Library  |
 | Lint / format | ESLint (flat config, `eslint-config-expo`), Prettier |
 | State         | React state, `useReducer`, and Context (no library)  |
-| Persistence   | Decided in M7 (Expo-provided key-value storage)      |
+| Persistence   | `expo-sqlite/kv-store` (versioned JSON session)      |
 | Builds        | Local `expo run:*` for development, EAS for release  |
 
 ### Dependency policy
@@ -208,7 +208,7 @@ orangeutan/
     ├── engine/              # pure game logic (M2+)
     ├── features/
     │   └── bootstrap/       # startup tasks + loading screen
-    ├── services/            # side-effect interfaces + adapters (M7+)
+    ├── services/            # side-effect interfaces + adapters
     ├── theme/               # tokens + ThemeProvider
     ├── ui/                  # presentational primitives
     └── test/                # shared test utilities
@@ -316,7 +316,6 @@ Each milestone is small, ends green (lint, typecheck, tests), and is started
 ## 8. Open decisions (owner to decide later)
 
 - Final bundle identifier / package name (placeholder: `com.orangeutan.app`).
-- Persistence module choice (M7).
 - Visual identity (M5): Treehouse direction, light palette, Evening dark palette, the Soft type pairing (Nunito and Source Sans 3), the Compact orange, and the Grin monkey are approved (see `docs/brand.md`). Logo and pixel-art style are still open. The live app uses the light palette and Soft pairing. Evening is not applied yet.
 - Monetization (none planned yet; no ads in the core loop).
 - License for the project (the template's Expo MIT license was removed).
