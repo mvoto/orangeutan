@@ -1,11 +1,13 @@
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { isSolved, levelOne } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
+import type { SaveStore } from '@/services/save-store';
 
 import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionState } from './level-session-state';
+import { decodeSave, encodeSave } from './save';
 
 type LevelSession = {
   readonly puzzle: Puzzle;
@@ -19,13 +21,28 @@ type LevelSession = {
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
 
-function createSession(): LevelSessionState {
-  return startingState();
+function readSession(store: SaveStore): LevelSessionState {
+  try {
+    return decodeSave(store.read());
+  } catch {
+    return startingState();
+  }
 }
 
-/** Placed Symbols live here so leaving Level 1 does not clear the grid. */
-export function LevelSessionProvider({ children }: PropsWithChildren): React.JSX.Element {
-  const [state, dispatch] = useReducer(levelSessionReducer, null, createSession);
+/** Placed Symbols live here so leaving the app does not clear the grid. */
+export function LevelSessionProvider({
+  children,
+  store,
+}: PropsWithChildren<{ readonly store: SaveStore }>): React.JSX.Element {
+  const [state, dispatch] = useReducer(levelSessionReducer, store, readSession);
+
+  useEffect(() => {
+    try {
+      store.write(encodeSave(state));
+    } catch {
+      // The session keeps running when the device cannot store it.
+    }
+  }, [state, store]);
   const cycle = useCallback((index: number) => {
     dispatch({ type: 'cycle', index });
   }, []);

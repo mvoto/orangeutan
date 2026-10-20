@@ -4,6 +4,7 @@ import CelebrationRoute from '@/app/celebration';
 import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
+import { deviceSaveStore } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
 import type { Theme } from '@/theme';
 import { treehouseTheme } from '@/theme';
@@ -39,7 +40,7 @@ jest.mock('expo-video', () => ({
 
 function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
   return renderWithTheme(
-    <LevelSessionProvider>
+    <LevelSessionProvider store={deviceSaveStore}>
       <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
     theme === undefined ? {} : { theme },

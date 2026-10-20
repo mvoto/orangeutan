@@ -27,6 +27,9 @@
     "testMatch": [
       "**/__tests__/**/*.test.ts?(x)"
     ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/test/jest-setup.ts"
+    ],
     "collectCoverageFrom": [
       "src/**/*.{ts,tsx}",
       "!src/**/__tests__/**",
@@ -43,6 +46,7 @@
     "expo-linking": "~58.0.13",
     "expo-router": "~58.0.23",
     "expo-splash-screen": "~58.0.10",
+    "expo-sqlite": "~58.0.13",
     "expo-status-bar": "~58.0.3",
     "expo-system-ui": "~58.0.6",
     "expo-video": "~58.0.12",

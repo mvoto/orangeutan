@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { LevelSessionProvider } from '@/features/level';
+import { deviceSaveStore } from '@/services/save-store';
 import { treehouseTheme, treehouseType, ThemeProvider } from '@/theme';
 import { ErrorFallback } from '@/ui';
 
@@ -49,7 +50,7 @@ export default function RootLayout(): React.JSX.Element | null {
 
   return (
     <ThemeProvider theme={treehouseTheme}>
-      <LevelSessionProvider>
+      <LevelSessionProvider store={deviceSaveStore}>
         <StatusBar style="dark" />
         <Stack
           screenOptions={{
