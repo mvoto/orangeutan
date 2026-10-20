@@ -1,5 +1,6 @@
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 
+import CelebrationRoute from '@/app/celebration';
 import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
@@ -9,6 +10,32 @@ import { treehouseTheme } from '@/theme';
 
 import { LevelScreen } from '../level-screen';
 import { LevelSessionProvider } from '../level-session';
+
+type CelebrationPlayer = {
+  muted: boolean;
+  loop: boolean;
+  source: number;
+  play: jest.Mock;
+};
+
+const mockCelebrationPlayer: CelebrationPlayer = {
+  muted: false,
+  loop: false,
+  source: 0,
+  play: jest.fn(),
+};
+
+jest.mock('expo-video', () => ({
+  useVideoPlayer: (
+    source: number,
+    setup?: (player: { muted: boolean; loop: boolean; source: number; play: jest.Mock }) => void,
+  ) => {
+    mockCelebrationPlayer.source = source;
+    setup?.(mockCelebrationPlayer);
+    return mockCelebrationPlayer;
+  },
+  VideoView: () => null,
+}));
 
 function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
   return renderWithTheme(
@@ -128,4 +155,69 @@ describe('Level 1', () => {
       await screen.findByRole('button', { name: 'Row 1, column 3, monkey' }, { timeout: 3000 }),
     ).toBeOnTheScreen();
   });
+
+  it('celebrates a solved Level 1 and opens Level 2 instead of replaying it', async () => {
+    mockCelebrationPlayer.muted = false;
+    mockCelebrationPlayer.play.mockClear();
+
+    await renderRouter(
+      {
+        _layout: RootLayout,
+        home: HomeRoute,
+        level: LevelRoute,
+        celebration: CelebrationRoute,
+      },
+      { initialUrl: '/home' },
+    );
+
+    await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
+    await screen.findByTestId('level-screen', {}, { timeout: 3000 });
+    expect(screen.queryByText('Edge clues')).not.toBeOnTheScreen();
+
+    await fillLevelOne();
+
+    expect(await screen.findByTestId('celebration-screen', {}, { timeout: 3000 })).toHaveStyle({
+      backgroundColor: '#FDBF4E',
+    });
+    expect(screen.queryByRole('button', { name: 'Back' })).not.toBeOnTheScreen();
+    expect(mockCelebrationPlayer.muted).toBe(true);
+    expect(mockCelebrationPlayer.play).toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.getAllByText('×')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Row 1, column 1, monkey' })).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+    await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
+
+    expect(
+      await screen.findByRole('button', { name: 'Row 1, column 1, monkey' }, { timeout: 3000 }),
+    ).toBeOnTheScreen();
+    expect(screen.getByText('Edge clues')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Row 1, column 1, orange' })).not.toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Row 6, column 6, empty' }));
+    expect(screen.getByTestId('level-screen')).toBeOnTheScreen();
+    expect(screen.queryByTestId('celebration-screen')).not.toBeOnTheScreen();
+  });
 });
+
+/** Level 1's known solution, counted in taps from empty: monkey, then orange. */
+async function fillLevelOne(): Promise<void> {
+  const tapsByIndex = [0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2];
+  const marks = ['empty', 'monkey', 'orange'] as const;
+
+  for (let index = 0; index < tapsByIndex.length; index += 1) {
+    const taps = tapsByIndex[index] ?? 0;
+    const row = Math.floor(index / 4) + 1;
+    const column = (index % 4) + 1;
+    for (let tap = 0; tap < taps; tap += 1) {
+      await fireEvent.press(
+        screen.getByRole('button', { name: `Row ${row}, column ${column}, ${marks[tap]}` }),
+      );
+    }
+  }
+}

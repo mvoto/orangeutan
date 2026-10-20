@@ -1,18 +1,18 @@
-import { memo, useMemo } from 'react';
+import { Fragment, memo, useMemo } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
-import { brokenLines, cellIndex, levelOne } from '@/engine';
-import type { Cell } from '@/engine';
+import { brokenLines, cellIndex } from '@/engine';
+import type { Cell, EdgeClue } from '@/engine';
 import type { ColorTokens } from '@/theme';
 import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
 import { AppText, Button, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
 
-const ruleCards = ['No three in a row', 'Balance'] as const;
-const size = levelOne.size;
+const levelOneCards = ['No three in a row', 'Balance'] as const;
+const levelTwoCards = ['No three in a row', 'Balance', 'Edge clues'] as const;
 
 type LevelScreenProps = {
   readonly onBack: () => void;
@@ -30,8 +30,10 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, cycle } = useLevelSession();
-  const outlined = useMemo(() => outlinedCells(cells), [cells]);
+  const { cells, cycle, puzzle } = useLevelSession();
+  const size = puzzle.size;
+  const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
+  const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
   const cardsStyle = useMemo(
     () => [styles.cards, { gap: spacing.sm, marginTop: spacing.md }],
     [spacing.sm, spacing.md],
@@ -48,11 +50,8 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
     ],
     [colors.surface, colors.border, radii.md, spacing.sm],
   );
-  const gridStyle = useMemo(
-    () => ({ marginTop: spacing.lg, gap: spacing.xs }),
-    [spacing.lg, spacing.xs],
-  );
-  const rowStyle = useMemo(() => [styles.row, { gap: spacing.xs }], [spacing.xs]);
+  const gridStyle = useMemo(() => ({ marginTop: spacing.lg }), [spacing.lg]);
+  const gapStyle = useMemo(() => ({ width: spacing.xs, height: spacing.xs }), [spacing.xs]);
   const cellStyle = useMemo(
     () => [styles.cell, { borderColor: colors.border, borderStyle: 'solid' as const }],
     [colors.border],
@@ -75,24 +74,54 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
       </View>
       <View style={gridStyle}>
         {Array.from({ length: size }, (_, row) => (
-          <View key={row} style={rowStyle}>
-            {Array.from({ length: size }, (_, column) => {
-              const index = cellIndex(row, column, size);
-              const cell = cells[index] ?? 'empty';
-              return (
-                <GridCell
-                  key={column}
-                  index={index}
-                  row={row}
-                  column={column}
-                  cell={cell}
-                  onCycle={cycle}
-                  style={outlined.has(index) ? brokenCellStyle : cellStyle}
-                  wash={washes[cell]}
-                />
-              );
-            })}
-          </View>
+          <Fragment key={row}>
+            <View style={styles.row}>
+              {Array.from({ length: size }, (_, column) => {
+                const index = cellIndex(row, column, size);
+                const cell = cells[index] ?? 'empty';
+                return (
+                  <Fragment key={column}>
+                    <GridCell
+                      index={index}
+                      row={row}
+                      column={column}
+                      cell={cell}
+                      onCycle={cycle}
+                      style={outlined.has(index) ? brokenCellStyle : cellStyle}
+                      wash={washes[cell]}
+                    />
+                    {column < size - 1 ? (
+                      <EdgeMark
+                        clue={edgeClueBetween(puzzle.edgeClues, index, index + 1)}
+                        gapStyle={gapStyle}
+                      />
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </View>
+            {row < size - 1 ? (
+              <View style={styles.row}>
+                {Array.from({ length: size }, (_, column) => {
+                  const index = cellIndex(row, column, size);
+                  const beside = edgeClueBetween(puzzle.edgeClues, index, index + 1);
+                  return (
+                    <Fragment key={column}>
+                      <View style={styles.markCell}>
+                        <EdgeMark
+                          clue={edgeClueBetween(puzzle.edgeClues, index, index + size)}
+                          gapStyle={gapStyle}
+                        />
+                      </View>
+                      {column < size - 1 ? (
+                        <View style={beside === undefined ? gapStyle : styles.clue} />
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </View>
+            ) : null}
+          </Fragment>
         ))}
       </View>
     </Screen>
@@ -124,12 +153,46 @@ const GridCell = memo(function GridCell({
   );
 });
 
-function outlinedCells(cells: readonly Cell[]): ReadonlySet<number> {
+function outlinedCells(
+  cells: readonly Cell[],
+  edgeClues: readonly EdgeClue[],
+): ReadonlySet<number> {
   const indexes = new Set<number>();
-  for (const broken of brokenLines(cells)) {
+  for (const broken of brokenLines(cells, edgeClues)) {
     for (const index of broken.cellIndexes) indexes.add(index);
   }
   return indexes;
+}
+
+function edgeClueBetween(
+  clues: readonly EdgeClue[],
+  left: number,
+  right: number,
+): EdgeClue | undefined {
+  return clues.find(
+    (clue) => (clue.a === left && clue.b === right) || (clue.a === right && clue.b === left),
+  );
+}
+
+function EdgeMark({
+  clue,
+  gapStyle,
+}: {
+  readonly clue: EdgeClue | undefined;
+  readonly gapStyle: StyleProp<ViewStyle>;
+}): React.JSX.Element {
+  if (clue === undefined) return <View style={gapStyle} />;
+
+  const same = clue.relation === 'same';
+  return (
+    <View
+      style={styles.clue}
+      accessible
+      accessibilityLabel={same ? 'Edge clue, same' : 'Edge clue, opposite'}
+    >
+      <AppText>{same ? '=' : '×'}</AppText>
+    </View>
+  );
 }
 
 function washStyles(colors: ColorTokens): Record<Cell, ViewStyle> {
@@ -158,7 +221,9 @@ function symbolXml(cell: Cell): string | null {
 const styles = StyleSheet.create({
   cards: { flexDirection: 'row', flexWrap: 'wrap' },
   card: { borderWidth: 1 },
-  row: { flexDirection: 'row' },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  markCell: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  clue: { width: 16, alignItems: 'center', justifyContent: 'center' },
   cell: {
     flex: 1,
     aspectRatio: 1,

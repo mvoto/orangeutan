@@ -6,9 +6,18 @@ export type Cell = Symbol | 'empty';
 
 export type Line = 'row' | 'column';
 
-/** A 4×4 Puzzle. Givens are locked Symbols; null cells are for the player. */
+export type EdgeRelation = 'same' | 'opposite';
+
+/** A mark on the border between two orthogonally adjacent cells. */
+export type EdgeClue = {
+  readonly a: number;
+  readonly b: number;
+  readonly relation: EdgeRelation;
+};
+
+/** A Puzzle. Givens are locked Symbols; null cells are for the player. */
 export type Puzzle = {
-  readonly size: 4;
-  readonly edgeClues: readonly [];
+  readonly size: 4 | 6;
+  readonly edgeClues: readonly EdgeClue[];
   readonly givens: readonly (Symbol | null)[];
 };

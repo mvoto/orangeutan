@@ -1,4 +1,4 @@
-import { brokenLines, cycleCell, levelOne, logicalSolution } from '../index';
+import { brokenLines, cycleCell, levelOne, levelTwo, logicalSolution } from '../index';
 
 import type { Cell } from '../types';
 
@@ -127,6 +127,47 @@ describe('4×4 rules with no Edge clues', () => {
     expect(cycleCell(puzzle, cells, 1)).not.toEqual(cells);
   });
 
+  it('breaks an Edge clue once both cells disagree with it', () => {
+    const different = grid(`
+      MO..
+      ....
+      ....
+      ....
+    `);
+
+    expect(brokenLines(different, [{ a: 0, b: 1, relation: 'same' }])).toContainEqual({
+      rule: 'edge-clue',
+      line: 'row',
+      index: 0,
+      cellIndexes: [0, 1],
+    });
+    expect(brokenLines(different, [{ a: 0, b: 1, relation: 'opposite' }])).toEqual([]);
+
+    const sameColumn = grid(`
+      M...
+      M...
+      ....
+      ....
+    `);
+    expect(brokenLines(sameColumn, [{ a: 0, b: 4, relation: 'opposite' }])).toContainEqual({
+      rule: 'edge-clue',
+      line: 'column',
+      index: 0,
+      cellIndexes: [0, 4],
+    });
+  });
+
+  it('waits to judge an Edge clue until both cells hold a Symbol', () => {
+    const cells = grid(`
+      M...
+      ....
+      ....
+      ....
+    `);
+
+    expect(brokenLines(cells, [{ a: 0, b: 1, relation: 'same' }])).toEqual([]);
+  });
+
   it('gives Level 1 exactly one logical solution and no Edge clues', () => {
     expect(levelOne).toEqual({
       size: 4,
@@ -171,6 +212,29 @@ describe('4×4 rules with no Edge clues', () => {
         'orange',
         'orange',
       ],
+    });
+  });
+});
+
+describe('Level 2', () => {
+  it('is the first 6×6 and has exactly one logical solution', () => {
+    expect(levelTwo.size).toBe(6);
+    expect(levelTwo.edgeClues).toEqual([
+      { a: 0, b: 1, relation: 'opposite' },
+      { a: 34, b: 35, relation: 'opposite' },
+    ]);
+    expect(levelOne.edgeClues).toEqual([]);
+
+    expect(logicalSolution(levelTwo)).toEqual({
+      count: 1,
+      cells: grid(`
+        MOMOMO
+        OMOMOM
+        MOMOMO
+        OMOMOM
+        MOMOMO
+        OMOMOM
+      `),
     });
   });
 });
