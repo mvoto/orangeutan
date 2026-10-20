@@ -7,6 +7,7 @@ import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
 import { logicalSolution } from '@/engine';
+import type { Puzzle } from '@/engine';
 import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
 import type { Theme } from '@/theme';
@@ -193,21 +194,21 @@ describe('Level 1', () => {
     expect(screen.queryByText('Edge clues')).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    const levelTwo = levelSequence[1];
+    if (levelTwo === undefined) throw new Error('Level 2 is missing');
+    const given = givenCell(levelTwo);
     expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();
-    expect(screen.getAllByText('×')).toHaveLength(2);
-    expect(screen.getByRole('button', { name: 'Row 1, column 1, monkey' })).toBeOnTheScreen();
+    expect(screen.getAllByText('=')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: given })).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
 
-    expect(
-      await screen.findByRole('button', { name: 'Row 1, column 1, monkey' }, { timeout: 3000 }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: given }, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.getByText('Edge clues')).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Row 1, column 1, orange' })).not.toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Row 6, column 6, empty' }));
+    await fillOpenCells(levelTwo);
 
     expect(
       await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
@@ -280,6 +281,32 @@ describe('the last Level', () => {
     expect(share).toHaveBeenCalledWith({ message: String(levelSequence.length) });
   });
 });
+
+function givenCell(puzzle: Puzzle): string {
+  const index = puzzle.givens.findIndex((given) => given !== null);
+  const row = Math.floor(index / puzzle.size) + 1;
+  const column = (index % puzzle.size) + 1;
+  return `Row ${row}, column ${column}, ${puzzle.givens[index]}`;
+}
+
+async function fillOpenCells(puzzle: Puzzle): Promise<void> {
+  const solution = logicalSolution(puzzle);
+  if (!solution.ok) throw new Error('The Level has no solution');
+  const marks = ['empty', 'monkey', 'orange'] as const;
+  for (let index = 0; index < puzzle.givens.length; index += 1) {
+    if (puzzle.givens[index] !== null) continue;
+    const symbol = solution.value.cells[index];
+    if (symbol !== 'monkey' && symbol !== 'orange') throw new Error('Open cell has no Symbol');
+    const taps = symbol === 'monkey' ? 1 : 2;
+    const row = Math.floor(index / puzzle.size) + 1;
+    const column = (index % puzzle.size) + 1;
+    for (let tap = 0; tap < taps; tap += 1) {
+      await fireEvent.press(
+        screen.getByRole('button', { name: `Row ${row}, column ${column}, ${marks[tap]}` }),
+      );
+    }
+  }
+}
 
 /** Level 1's known solution, counted in taps from empty: monkey, then orange. */
 async function fillLevelOne(): Promise<void> {

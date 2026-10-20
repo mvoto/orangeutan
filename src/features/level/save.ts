@@ -5,7 +5,7 @@ import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionState } from './level-session-state';
 import { levelNumber, nextLevel, puzzleAt } from './sequence';
 
-const saveVersion = 1;
+const saveVersion = 2;
 
 export type OpenedSave = {
   readonly state: LevelSessionState;
@@ -60,8 +60,8 @@ function readSave(value: unknown): OpenedSave {
 }
 
 /**
- * Version 1 is the current document. A higher version is left untouched.
- * An older version will convert here before it is read.
+ * Version 2 is the current document. A higher version is left untouched.
+ * Version 1 named Levels in the nearly full pack. Only Level 1 is the same Puzzle.
  */
 function migrate(
   value: unknown,
@@ -73,6 +73,9 @@ function migrate(
   const record = value as { version?: unknown; level?: unknown; cells?: unknown };
   if (typeof record.version === 'number' && record.version > saveVersion)
     return { kind: 'foreign' };
+  if (record.version === 1 && record.level === 1) {
+    return { kind: 'current', level: record.level, cells: record.cells };
+  }
   if (record.version !== saveVersion) return { kind: 'invalid' };
   return { kind: 'current', level: record.level, cells: record.cells };
 }
