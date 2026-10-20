@@ -12,17 +12,19 @@ import type { Puzzle } from '../src/engine/types';
  * Adds Levels at the end of the one sequence.
  * Run with `npx tsx scripts/generate-level-pack.ts`.
  * Shipped Levels stay at their indexes, because a save stores that index.
+ * The nearly full pack was replaced once. Save version 1 keeps only Level 1.
  * Within a size, higher Given counts come first.
  */
-const perCount = 20;
-const sixGivenCounts = [34, 33, 32, 31, 30];
-const eightGivenCounts = [62, 61, 60, 59, 58];
+const perCount = 10;
+const sixGivenCounts = [15, 14, 13, 12, 11, 10, 9, 8, 7, 6];
+const eightGivenCounts = [22, 20, 18, 16, 15, 14, 13, 12, 11, 10];
 const packPath = fileURLToPath(new URL('../src/features/level/level-pack.json', import.meta.url));
 
 const slots: readonly PackSlot[] = [
   ...slotsFor(6, sixGivenCounts),
   ...slotsFor(8, eightGivenCounts),
 ];
+const seeds = new Map<string, number>();
 
 void writePack();
 
@@ -39,8 +41,6 @@ function slotsFor(size: 6 | 8, givenCounts: readonly number[]): PackSlot[] {
     Array.from({ length: perCount }, () => ({ size, givenCount })),
   );
 }
-
-const seeds = new Map<string, number>();
 
 function make(slot: PackSlot): Puzzle {
   const key = `${slot.size}:${slot.givenCount}`;

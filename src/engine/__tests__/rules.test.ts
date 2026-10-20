@@ -255,27 +255,13 @@ describe('4×4 rules with no Edge clues', () => {
 });
 
 describe('Level 2', () => {
-  it('is the first 6×6 and has exactly one logical solution', () => {
-    expect(levelTwo.size).toBe(6);
-    expect(levelTwo.edgeClues).toEqual([
-      { a: 0, b: 1, relation: 'opposite' },
-      { a: 34, b: 35, relation: 'opposite' },
-    ]);
-    expect(levelOne.edgeClues).toEqual([]);
+  it('is the first 6×6, leaves most cells open, and has one logical solution', () => {
+    const givens = levelTwo.givens.filter((given) => given !== null).length;
 
-    expect(logicalSolution(levelTwo)).toEqual({
-      ok: true,
-      value: {
-        count: 1,
-        cells: grid(`
-        MOMOMO
-        OMOMOM
-        MOMOMO
-        OMOMOM
-        MOMOMO
-        OMOMOM
-      `),
-      },
-    });
+    expect(levelTwo.size).toBe(6);
+    expect(levelTwo.edgeClues.length).toBeGreaterThanOrEqual(2);
+    expect(levelOne.edgeClues).toEqual([]);
+    expect(levelTwo.givens.length - givens).toBeGreaterThan(givens);
+    expect(logicalSolution(levelTwo)).toMatchObject({ ok: true, value: { count: 1 } });
   });
 });

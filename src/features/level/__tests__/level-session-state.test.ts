@@ -25,10 +25,11 @@ describe('level session state', () => {
     const next = levelSessionReducer(startingState(), { type: 'advance' });
 
     expect(next.cells).toHaveLength(36);
-    expect(next.cells[0]).toBe('monkey');
-    expect(next.cells[35]).toBe('empty');
+    expect(next.puzzle.edgeClues.length).toBeGreaterThan(0);
+    const givenIndex = next.puzzle.givens.findIndex((given) => given !== null);
+    expect(givenIndex).toBeGreaterThanOrEqual(0);
 
-    const locked = levelSessionReducer(next, { type: 'cycle', index: 0 });
-    expect(locked.cells[0]).toBe('monkey');
+    const locked = levelSessionReducer(next, { type: 'cycle', index: givenIndex });
+    expect(locked.cells[givenIndex]).toBe(next.cells[givenIndex]);
   });
 });

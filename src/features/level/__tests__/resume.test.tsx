@@ -46,7 +46,7 @@ describe('resume', () => {
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toBe(
-      '{"version":1,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"]}',
+      '{"version":2,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"]}',
     );
     expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeOnTheScreen();
@@ -104,8 +104,17 @@ describe('resume', () => {
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
 
+    const levelTwo = levelSequence[1];
+    if (levelTwo === undefined) throw new Error('Level 2 is missing');
+    const givenIndex = levelTwo.givens.findIndex((given) => given !== null);
+    const row = Math.floor(givenIndex / levelTwo.size) + 1;
+    const column = (givenIndex % levelTwo.size) + 1;
+
     expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Row 1, column 1, monkey' })).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Row 1, column 1, orange' })).not.toBeOnTheScreen();
+    expect(
+      screen.getByRole('button', {
+        name: `Row ${row}, column ${column}, ${levelTwo.givens[givenIndex]}`,
+      }),
+    ).toBeOnTheScreen();
   });
 });

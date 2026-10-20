@@ -33,6 +33,18 @@ describe('shipped Levels', () => {
     expect(nonIncreasing(levelSequence.slice(firstEight))).toBe(true);
   });
 
+  it('leaves most cells for the player, and later Levels do not get easier', () => {
+    const opens = levelSequence.map((puzzle) => puzzle.givens.length - givenCount(puzzle.givens));
+
+    for (let index = 0; index < levelSequence.length; index += 1) {
+      const puzzle = levelSequence[index];
+      if (puzzle === undefined) continue;
+      const open = opens[index] ?? 0;
+      expect(open).toBeGreaterThan(givenCount(puzzle.givens));
+      if (index > 0) expect(open).toBeGreaterThanOrEqual(opens[index - 1] ?? 0);
+    }
+  });
+
   it('gives every shipped Puzzle one logical solution', () => {
     for (const puzzle of levelSequence) {
       expect(logicalSolution(puzzle)).toMatchObject({ ok: true, value: { count: 1 } });

@@ -2,6 +2,7 @@ import { isSolved, levelOne } from '@/engine';
 
 import type { LevelSessionState } from '../level-session-state';
 import { levelSessionReducer, startingState } from '../level-session-state';
+import { levelSequence } from '../sequence';
 import { decodeSave, encodeSave, openSave } from '../save';
 
 const solvedLevelOne: LevelSessionState = {
@@ -33,7 +34,7 @@ describe('save', () => {
 
   it('starts Level 1 when the save cannot be read', () => {
     expect(decodeSave('not json')).toEqual(startingState());
-    expect(decodeSave('{"version":2,"level":1,"cells":[]}')).toEqual(startingState());
+    expect(decodeSave('{"version":3,"level":1,"cells":[]}')).toEqual(startingState());
     expect(decodeSave('{"version":1,"level":9,"cells":[]}')).toEqual(startingState());
 
     const changedGiven = encodeSave(startingState());
@@ -42,8 +43,20 @@ describe('save', () => {
     expect(openSave('not json').preserveDocument).toBe(false);
   });
 
+  it('does not open a Level from the old nearly full pack', () => {
+    const oldLevel = levelSequence[2];
+    if (oldLevel === undefined) throw new Error('Level 3 is missing');
+    const old = JSON.stringify({
+      version: 1,
+      level: 3,
+      cells: oldLevel.givens.map((given) => given ?? 'empty'),
+    });
+
+    expect(decodeSave(old)).toEqual(startingState());
+  });
+
   it('leaves a newer save on disk', () => {
-    const newer = '{"version":2,"level":1,"cells":[]}';
+    const newer = '{"version":3,"level":1,"cells":[]}';
     const opened = openSave(newer);
 
     expect(opened.state).toEqual(startingState());
@@ -68,8 +81,8 @@ describe('save', () => {
     const restored = decodeSave(encodeSave(solvedLevelOne));
 
     expect(restored.puzzle.size).toBe(6);
-    expect(restored.cells[0]).toBe('monkey');
-    expect(restored.cells[35]).toBe('empty');
+    expect(restored.puzzle.edgeClues.length).toBeGreaterThan(0);
+    expect(restored.cells).toHaveLength(36);
   });
 
   it('keeps placed Symbols and the current Level', () => {
@@ -79,7 +92,7 @@ describe('save', () => {
     const levelTwo = levelSessionReducer(startingState(), { type: 'advance' });
     const restored = decodeSave(encodeSave(levelTwo));
     expect(restored.cells).toHaveLength(36);
-    expect(restored.cells[0]).toBe('monkey');
     expect(restored.puzzle.size).toBe(6);
+    expect(restored.puzzle.edgeClues.length).toBeGreaterThan(0);
   });
 });
