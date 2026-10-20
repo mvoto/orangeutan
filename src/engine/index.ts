@@ -4,6 +4,7 @@ export type { RuleName } from './rules/line-rule';
 export { cellIndex } from './cell-index';
 export { cellsFromGivens } from './cells-from-givens';
 export { generatePuzzle } from './generator';
+export type { PuzzleMiss } from './generator';
 export { createRng } from './rng';
 export type { Rng } from './rng';
 export { cycleCell } from './cycle-cell';

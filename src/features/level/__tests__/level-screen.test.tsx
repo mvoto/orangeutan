@@ -219,7 +219,9 @@ describe('Level 1', () => {
     expect(await screen.findByTestId('level-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
   });
+});
 
+describe('the last Level', () => {
   it('offers Home and the Score after the last Level', async () => {
     const share = jest
       .spyOn(Share, 'share')
