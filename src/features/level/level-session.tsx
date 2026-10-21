@@ -40,6 +40,7 @@ type LevelSession = {
   /** Sum of Play time across every Level reached. */
   readonly playTime: number;
   readonly cycle: (index: number) => void;
+  readonly clear: () => void;
   readonly advance: () => void;
   readonly setLevelOpen: (open: boolean) => void;
 };
@@ -124,6 +125,9 @@ export function LevelSessionProvider({
   const cycle = useCallback((index: number) => {
     dispatch({ type: 'cycle', index });
   }, []);
+  const clear = useCallback(() => {
+    dispatch({ type: 'clear' });
+  }, []);
   const advance = useCallback(() => {
     dispatch({ type: 'advance' });
   }, []);
@@ -145,6 +149,7 @@ export function LevelSessionProvider({
       playSeconds,
       playTime,
       cycle,
+      clear,
       advance,
       setLevelOpen,
     }),
@@ -159,6 +164,7 @@ export function LevelSessionProvider({
       playSeconds,
       playTime,
       cycle,
+      clear,
       advance,
       setLevelOpen,
     ],

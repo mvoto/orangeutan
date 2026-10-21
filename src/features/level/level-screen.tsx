@@ -7,7 +7,7 @@ import { brokenLines, cellIndex } from '@/engine';
 import type { Cell, EdgeClue } from '@/engine';
 import type { ColorTokens } from '@/theme';
 import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
-import { AppText, Screen } from '@/ui';
+import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
 
@@ -30,7 +30,8 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, cycle, level, playSeconds, puzzle } = useLevelSession();
+  const { cells, clear, cycle, level, playSeconds, puzzle } = useLevelSession();
+  const timer = playTimeLabel(playSeconds);
   const size = puzzle.size;
   const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
@@ -56,6 +57,10 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
     [colors.surface, colors.border, radii.md, spacing.sm],
   );
   const gridStyle = useMemo(() => ({ marginTop: spacing.lg }), [spacing.lg]);
+  const clearStyle = useMemo(
+    () => ({ marginTop: spacing.md, alignItems: 'flex-start' as const }),
+    [spacing.md],
+  );
   const gapStyle = useMemo(() => ({ width: spacing.xs, height: spacing.xs }), [spacing.xs]);
   const cellStyle = useMemo(
     () => [styles.cell, { borderColor: colors.border, borderStyle: 'solid' as const }],
@@ -84,7 +89,7 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
           />
         </Pressable>
         <AppText>{`Level ${level}`}</AppText>
-        <AppText accessibilityLabel={`${playSeconds} seconds on this Level`}>{playSeconds}</AppText>
+        <AppText accessibilityLabel={timer}>{timer}</AppText>
       </View>
       <View style={cardsStyle}>
         {ruleCards.map((title) => (
@@ -144,6 +149,9 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
             ) : null}
           </Fragment>
         ))}
+      </View>
+      <View style={clearStyle}>
+        <Button label="Clear" onPress={clear} />
       </View>
     </Screen>
   );

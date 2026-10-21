@@ -63,15 +63,13 @@ describe('resume', () => {
     await renderRouter(routes, { initialUrl: '/home' });
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
-    expect(
-      await screen.findByLabelText('0 seconds on this Level', {}, { timeout: 3000 }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByLabelText('timer: 00:00', {}, { timeout: 3000 })).toBeOnTheScreen();
 
     await act(() => {
       advancePlayClock();
     });
 
-    expect(screen.getByLabelText('1 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:01')).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toContain('"seconds":[1]');
   });
 
@@ -83,47 +81,43 @@ describe('resume', () => {
 
     await renderRouter(routes, { initialUrl: '/level' });
 
-    expect(
-      await screen.findByLabelText('1 seconds on this Level', {}, { timeout: 3000 }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByLabelText('timer: 00:01', {}, { timeout: 3000 })).toBeOnTheScreen();
   });
 
   it('shows the Home total and pauses off the Level and in the background', async () => {
     await renderRouter(routes, { initialUrl: '/home' });
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
-    expect(screen.getByLabelText('0 total seconds across Levels')).toBeOnTheScreen();
+    expect(screen.getByLabelText('total timer: 00:00')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
-    await screen.findByLabelText('0 seconds on this Level', {}, { timeout: 3000 });
+    await screen.findByLabelText('timer: 00:00', {}, { timeout: 3000 });
     await act(() => {
       advancePlayClock();
     });
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
 
     expect(
-      await screen.findByLabelText('1 total seconds across Levels', {}, { timeout: 3000 }),
+      await screen.findByLabelText('total timer: 00:01', {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
     await act(() => {
       advancePlayClock();
     });
-    expect(screen.getByLabelText('1 total seconds across Levels')).toBeOnTheScreen();
+    expect(screen.getByLabelText('total timer: 00:01')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
-    expect(
-      await screen.findByLabelText('1 seconds on this Level', {}, { timeout: 3000 }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByLabelText('timer: 00:01', {}, { timeout: 3000 })).toBeOnTheScreen();
     await act(() => {
       setForegroundForTest(false);
       advancePlayClock();
     });
-    expect(screen.getByLabelText('1 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:01')).toBeOnTheScreen();
     await act(() => {
       setForegroundForTest(true);
     });
     await act(() => {
       advancePlayClock();
     });
-    expect(screen.getByLabelText('2 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:02')).toBeOnTheScreen();
   });
 
   it('keeps solved seconds and starts the next Level at zero', async () => {
@@ -133,11 +127,11 @@ describe('resume', () => {
     await renderRouter({ ...routes, celebration: CelebrationRoute }, { initialUrl: '/home' });
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
-    await screen.findByLabelText('0 seconds on this Level', {}, { timeout: 3000 });
+    await screen.findByLabelText('timer: 00:00', {}, { timeout: 3000 });
     await act(() => {
       for (let second = 0; second < 10; second += 1) advancePlayClock();
     });
-    expect(screen.getByLabelText('10 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:10')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
     expect(
@@ -149,16 +143,14 @@ describe('resume', () => {
     expect(Storage.getItemSync(saveKey)).toContain('"seconds":[10]');
 
     await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
-    expect(
-      await screen.findByLabelText('0 seconds on this Level', {}, { timeout: 3000 }),
-    ).toBeOnTheScreen();
+    expect(await screen.findByLabelText('timer: 00:00', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.getByText('Level 2')).toBeOnTheScreen();
     await act(() => {
       for (let second = 0; second < 20; second += 1) advancePlayClock();
     });
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     expect(
-      await screen.findByLabelText('30 total seconds across Levels', {}, { timeout: 3000 }),
+      await screen.findByLabelText('total timer: 00:30', {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
   });
 
@@ -189,7 +181,7 @@ describe('resume', () => {
     expect(
       await screen.findByRole('button', { name: 'Row 1, column 3, monkey' }, { timeout: 3000 }),
     ).toBeOnTheScreen();
-    expect(screen.getByLabelText('0 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:00')).toBeOnTheScreen();
   });
 
   it('keeps the grid when the saved seconds cannot be read', async () => {
@@ -203,7 +195,7 @@ describe('resume', () => {
     expect(
       await screen.findByRole('button', { name: 'Row 1, column 3, monkey' }, { timeout: 3000 }),
     ).toBeOnTheScreen();
-    expect(screen.getByLabelText('0 seconds on this Level')).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:00')).toBeOnTheScreen();
   });
 
   it('leaves a newer save untouched', async () => {
@@ -211,7 +203,7 @@ describe('resume', () => {
     Storage.setItemSync(saveKey, newer);
 
     await renderRouter(routes, { initialUrl: '/level' });
-    await screen.findByLabelText('0 seconds on this Level', {}, { timeout: 3000 });
+    await screen.findByLabelText('timer: 00:00', {}, { timeout: 3000 });
     await act(() => {
       advancePlayClock();
     });
@@ -238,7 +230,7 @@ describe('resume', () => {
 
     expect(await screen.findByText('Score', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.getByText(String(levelSequence.length))).toBeOnTheScreen();
-    expect(screen.getByLabelText('4 total seconds across Levels')).toBeOnTheScreen();
+    expect(screen.getByLabelText('total timer: 00:04')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Share' }));
     expect(share).toHaveBeenCalledWith({ message: String(levelSequence.length) });
   });

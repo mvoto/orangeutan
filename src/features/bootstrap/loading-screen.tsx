@@ -1,7 +1,7 @@
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { AppText, Button, LogoPlaceholder, Screen } from '@/ui';
+import { AppText, Button, Logo, Screen } from '@/ui';
 
 import type { BootstrapStatus } from './use-bootstrap';
 
@@ -26,7 +26,7 @@ export function LoadingScreen({
         style={[styles.center, { gap: spacing.xl }]}
         onLayout={onLayout}
       >
-        <LogoPlaceholder />
+        <Logo />
         {status === 'error' ? (
           <View style={[styles.center, { gap: spacing.md }]}>
             <AppText color="textSecondary" align="center">

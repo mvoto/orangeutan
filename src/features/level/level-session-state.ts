@@ -12,6 +12,7 @@ export type LevelSessionState = {
 
 export type LevelSessionAction =
   | { readonly type: 'cycle'; readonly index: number }
+  | { readonly type: 'clear' }
   | { readonly type: 'advance' }
   | { readonly type: 'tick' };
 
@@ -30,6 +31,8 @@ export function levelSessionReducer(
   switch (action.type) {
     case 'cycle':
       return { ...state, cells: cycleCell(state.puzzle, state.cells, action.index) };
+    case 'clear':
+      return { ...state, cells: cellsFromGivens(state.puzzle) };
     case 'advance': {
       const next = nextLevel(state.puzzle);
       if (next === null) return state;

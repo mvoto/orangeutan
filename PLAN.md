@@ -42,7 +42,8 @@ art, names, and presentation are original.
 ### Player interaction
 
 Confirmed. Terms are in `GLOSSARY.md`. The sequence decision is in
-`docs/adr/0001-one-way-levels.md`.
+`docs/adr/0001-one-way-levels.md`. Identity, the store listing, and a later
+ranking are in `docs/adr/0002-anonymous-play.md`.
 
 - PLAY opens Level 1, then the current unsolved Level. A solved Level is retired.
 - Tap a cell to cycle: empty → monkey → orange → empty. Givens do not change.
@@ -52,8 +53,22 @@ Confirmed. Terms are in `GLOSSARY.md`. The sequence decision is in
 - Broken rules outline the involved cells while the player plays.
 - A quiet back control leaves an unfinished Level as it is.
 - The Celebration uses the current orangutan-and-orange drawing. Next continues. Home, after the last Level, shows the Score and Share.
-- Play time is the whole seconds spent on each Level while it is open and the app is in the foreground. Home shows the total throughout the sequence. The Score stays the count of solved Levels, shown only when every Level is solved, and is still the only shared number.
-- No undo and no reset. Hint can be added later.
+- Play time is the whole seconds spent on each Level while it is open and the app is in the foreground. Each Level shows its own time as `timer: 00:01`. Home shows the sum of every Level as `total timer: 00:30` throughout the sequence. The Score stays the count of solved Levels, shown only when every Level is solved, and is still the only shared number.
+- Clear puts the current board back to its Givens. It does not change Play time. There is no undo. Hint can be added later.
+- The player has no name and no avatar. Share sends the Score alone.
+- The gear on Home leads to the Privacy policy and to Support. There is no menu for sound, haptics, language, appearance, or reset. Sound, motion, and type size follow the system.
+
+### Store
+
+Decided in `docs/adr/0002-anonymous-play.md`.
+
+- The listing is a logic puzzle. It does not address children.
+- The privacy policy says the game is not directed to children under 13.
+- The App Store age rating is overridden to 13+. The questionnaire lists only content the game has.
+- Google Play's target audience is 13 and older. Play's content badge may still read younger, because it follows the content questionnaire.
+- The app is not in the Kids Category or Designed for Families, and it never asks the player's age.
+- Until ranking, nothing leaves the device except the system share sheet. The privacy label is Data Not Collected.
+- Privacy and Support are links in the app and on both store listings.
 
 ---
 
@@ -170,7 +185,8 @@ generation can be added later for an endless mode.
 
 Vertical slices that combine engine, UI, and services, for example `game`
 (board screen, reducer, input), `levels` (progression), `rewards` (pixel art
-reveal and gallery), `settings`, and `bootstrap` (startup tasks).
+reveal and gallery), and `bootstrap` (startup tasks). Home's gear is Privacy
+and Support, not a preferences feature.
 
 Game state lives in a reducer (`(state, action) => state`) that is pure and
 unit-tested independently of React.
@@ -226,20 +242,21 @@ Generation) and are git-ignored; never edit them by hand.
 Each milestone is small, ends green (lint, typecheck, tests), and is started
 **only when the owner asks**.
 
-| #   | Milestone                  | Outcome                                                                                                                        |
-| --- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| 0   | Plan                       | This document.                                                                                                                 |
-| 1   | Foundation                 | Expo + TS strict, lint, format, tests, routing, placeholder theme, loading screen. Runs on iOS simulator and Android emulator. |
-| 2   | Engine: model + validator  | Types, grid, rules, validator; full unit tests.                                                                                |
-| 3   | Engine: solver             | Propagation + solution counting; uniqueness proofs; property-based tests.                                                      |
-| 4   | Engine: generator + levels | Seeded generator, difficulty rating, level-pack script, at least 200 Levels verified in tests.                                 |
-| 5   | Identity exploration       | Mood board, palette, fonts, mascot, symbols, logo options. **Preview + approval.**                                             |
-| 6   | Game screen                | Grid, tap input, clues, violation highlights, win detection. Layout **previewed first**.                                       |
-| 7   | Progression + persistence  | Current unsolved Level only, saved progress, versioned save schema with safe migrations. No replay.                            |
-| 8   | Pixel-art rewards          | Reveal animation and gallery. Art style **approved first**.                                                                    |
-| 9   | Helpers                    | Hint (logical next step with explanation). Undo and reset are not planned.                                                     |
-| 10  | Polish                     | Haptics, sound, accessibility, reduced motion.                                                                                 |
-| 11  | Release                    | Final icon and splash, EAS builds, TestFlight / internal testing, store listing.                                               |
+| #   | Milestone                  | Outcome                                                                                                                                                                                                                                                                                                                       |
+| --- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | Plan                       | This document.                                                                                                                                                                                                                                                                                                                |
+| 1   | Foundation                 | Expo + TS strict, lint, format, tests, routing, placeholder theme, loading screen. Runs on iOS simulator and Android emulator.                                                                                                                                                                                                |
+| 2   | Engine: model + validator  | Types, grid, rules, validator; full unit tests.                                                                                                                                                                                                                                                                               |
+| 3   | Engine: solver             | Propagation + solution counting; uniqueness proofs; property-based tests.                                                                                                                                                                                                                                                     |
+| 4   | Engine: generator + levels | Seeded generator, difficulty rating, level-pack script, at least 200 Levels verified in tests.                                                                                                                                                                                                                                |
+| 5   | Identity exploration       | Mood board, palette, fonts, mascot, symbols, logo options. **Preview + approval.**                                                                                                                                                                                                                                            |
+| 6   | Game screen                | Grid, tap input, clues, violation highlights, win detection. Layout **previewed first**.                                                                                                                                                                                                                                      |
+| 7   | Progression + persistence  | Current unsolved Level only, saved progress, versioned save schema with safe migrations. No replay.                                                                                                                                                                                                                           |
+| 8   | Pixel-art rewards          | Reveal animation and gallery. Art style **approved first**.                                                                                                                                                                                                                                                                   |
+| 9   | Helpers                    | Hint (logical next step with explanation). Undo is not planned. Clear restores the current board.                                                                                                                                                                                                                             |
+| 10  | Polish                     | Haptics, sound, accessibility, reduced motion.                                                                                                                                                                                                                                                                                |
+| 11  | Release                    | Final icon and splash, EAS builds, TestFlight / internal testing, store listing. Privacy and Support links in the app and on the listing. Age rating overridden to 13+. Play target audience 13 and older.                                                                                                                    |
+| 12  | Ranking                    | Started only when the owner asks. A generated Nickname with rename, a per-device player id, and a Rank per Level by that Level's Play time, on iOS and Android. The Celebration shows the Rank when the board has loaded. Filter, report, block, delete, and a published contact. Preview the gear and the Celebration first. |
 
 ---
 
@@ -320,3 +337,4 @@ Each milestone is small, ends green (lint, typecheck, tests), and is started
 - Visual identity (M5): Treehouse direction, light palette, Evening dark palette, the Soft type pairing (Nunito and Source Sans 3), the Compact orange, and the Grin monkey are approved (see `docs/brand.md`). Logo and pixel-art style are still open. The live app uses the light palette and Soft pairing. Evening is not applied yet.
 - Monetization (none planned yet; no ads in the core loop).
 - License for the project (the template's Expo MIT license was removed).
+- Ranking (M12), when it is started: the Nickname word list, where the server runs, and who answers reports at the published contact.

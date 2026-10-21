@@ -17,6 +17,7 @@ import { treehouseTheme } from '@/theme';
 
 import { LevelScreen } from '../level-screen';
 import { LevelSessionProvider } from '../level-session';
+import { levelSessionReducer, startingState } from '../level-session-state';
 import { encodeSave } from '../save';
 import { levelSequence } from '../sequence';
 
@@ -93,6 +94,24 @@ describe('Level 1', () => {
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, orange' }));
     expect(screen.getByRole('button', { name: 'Row 1, column 3, empty' })).toBeOnTheScreen();
+  });
+
+  it('clears the board and leaves the Level timer', async () => {
+    const played = levelSessionReducer(
+      { ...startingState(), seconds: [7] },
+      { type: 'cycle', index: 2 },
+    );
+    Storage.setItemSync(saveKey, encodeSave(played));
+    await renderLevel();
+
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:07')).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, empty' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Row 1, column 1, orange' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:07')).toBeOnTheScreen();
   });
 
   it('outlines every cell in a broken row', async () => {

@@ -5,7 +5,7 @@ import { renderWithTheme } from '@/test/render-with-theme';
 import { LoadingScreen } from '../loading-screen';
 
 describe('<LoadingScreen />', () => {
-  it('shows the logo placeholder and a spinner while loading', async () => {
+  it('shows the logo and a spinner while loading', async () => {
     await renderWithTheme(<LoadingScreen status="loading" onRetry={jest.fn()} />);
 
     expect(screen.getByLabelText('Orangeutan')).toBeOnTheScreen();
