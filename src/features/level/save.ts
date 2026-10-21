@@ -5,7 +5,7 @@ import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionState } from './level-session-state';
 import { levelNumber, nextLevel, puzzleAt } from './sequence';
 
-const saveVersion = 2;
+const saveVersion = 3;
 
 export type OpenedSave = {
   readonly state: LevelSessionState;
@@ -18,6 +18,7 @@ export function encodeSave(state: LevelSessionState): string {
     version: saveVersion,
     level: levelNumber(state.puzzle),
     cells: state.cells,
+    seconds: state.seconds,
   });
 }
 
@@ -51,7 +52,11 @@ function readSave(value: unknown): OpenedSave {
     cells.push(cell);
   }
   if (!givensHold(puzzle, cells)) return playable(startingState());
-  const restored = { puzzle, cells };
+  const restored = {
+    puzzle,
+    cells,
+    seconds: secondsFor(levelNumber(puzzle), migrated.seconds),
+  };
   // A solved Level is retired. The next launch continues at the following Level.
   if (nextLevel(restored.puzzle) !== null && isSolved(restored.puzzle, restored.cells)) {
     return playable(levelSessionReducer(restored, { type: 'advance' }));
@@ -60,24 +65,48 @@ function readSave(value: unknown): OpenedSave {
 }
 
 /**
- * Version 2 is the current document. A higher version is left untouched.
+ * Version 3 is the current document. A higher version is left untouched.
  * Version 1 named Levels in the nearly full pack. Only Level 1 is the same Puzzle.
+ * Version 2 has the grid and no Play time.
  */
-function migrate(
-  value: unknown,
-):
-  | { readonly kind: 'current'; readonly level: unknown; readonly cells: unknown }
+function migrate(value: unknown):
+  | {
+      readonly kind: 'current';
+      readonly level: unknown;
+      readonly cells: unknown;
+      readonly seconds: unknown;
+    }
   | { readonly kind: 'foreign' }
   | { readonly kind: 'invalid' } {
   if (typeof value !== 'object' || value === null) return { kind: 'invalid' };
-  const record = value as { version?: unknown; level?: unknown; cells?: unknown };
+  const record = value as {
+    version?: unknown;
+    level?: unknown;
+    cells?: unknown;
+    seconds?: unknown;
+  };
   if (typeof record.version === 'number' && record.version > saveVersion)
     return { kind: 'foreign' };
   if (record.version === 1 && record.level === 1) {
-    return { kind: 'current', level: record.level, cells: record.cells };
+    return { kind: 'current', level: record.level, cells: record.cells, seconds: null };
+  }
+  if (record.version === 2) {
+    return { kind: 'current', level: record.level, cells: record.cells, seconds: null };
   }
   if (record.version !== saveVersion) return { kind: 'invalid' };
-  return { kind: 'current', level: record.level, cells: record.cells };
+  return { kind: 'current', level: record.level, cells: record.cells, seconds: record.seconds };
+}
+
+/** Missing or unreadable times become a zero for every Level already reached. */
+function secondsFor(level: number, raw: unknown): readonly number[] {
+  const zeros = Array.from({ length: level }, () => 0);
+  if (raw === null || !Array.isArray(raw) || raw.length !== level) return zeros;
+  const seconds: number[] = [];
+  for (const value of raw) {
+    if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) return zeros;
+    seconds.push(value);
+  }
+  return seconds;
 }
 
 function playable(state: LevelSessionState): OpenedSave {

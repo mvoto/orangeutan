@@ -15,6 +15,8 @@ type HomeScreenProps = {
   readonly score?: number | null;
   /** Current Level. Shown with PLAY, and hidden once the Score replaces it. */
   readonly level: number;
+  /** Sum of Play time across every Level reached. */
+  readonly playTime: number;
   readonly onShare?: () => void;
 };
 
@@ -24,6 +26,7 @@ export function HomeScreen({
   finished = false,
   score = null,
   level,
+  playTime,
   onShare = noAction,
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
@@ -32,6 +35,7 @@ export function HomeScreen({
     <Screen testID="home-screen">
       <View style={styles.settingsRow}>
         {finished ? null : <AppText style={styles.level}>{`Level ${level}`}</AppText>}
+        <AppText accessibilityLabel={`${playTime} total seconds across Levels`}>{playTime}</AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Settings"

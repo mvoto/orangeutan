@@ -30,7 +30,7 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, cycle, level, puzzle } = useLevelSession();
+  const { cells, cycle, level, playSeconds, puzzle } = useLevelSession();
   const size = puzzle.size;
   const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
@@ -84,6 +84,7 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
           />
         </Pressable>
         <AppText>{`Level ${level}`}</AppText>
+        <AppText accessibilityLabel={`${playSeconds} seconds on this Level`}>{playSeconds}</AppText>
       </View>
       <View style={cardsStyle}>
         {ruleCards.map((title) => (

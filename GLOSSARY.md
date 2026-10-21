@@ -31,3 +31,7 @@ _Avoid_: victory, win screen, picture
 **Score**:
 How many Levels the player has solved. It is shown only when every Level is solved.
 _Avoid_: points, stars, time
+
+**Play time**:
+Whole seconds the player has a Level open while the app is in the foreground. Home shows the sum across every Level reached, including the one in progress.
+_Avoid_: score, points, rank, stars

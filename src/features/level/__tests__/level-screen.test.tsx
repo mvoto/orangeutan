@@ -8,6 +8,8 @@ import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
 import { logicalSolution } from '@/engine';
 import type { Puzzle } from '@/engine';
+import { currentForeground } from '@/services/foreground';
+import { currentPlayClock } from '@/services/play-clock';
 import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
 import type { Theme } from '@/theme';
@@ -46,7 +48,11 @@ jest.mock('expo-video', () => ({
 
 function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
   return renderWithTheme(
-    <LevelSessionProvider store={deviceSaveStore}>
+    <LevelSessionProvider
+      store={deviceSaveStore}
+      clock={currentPlayClock()}
+      foreground={currentForeground()}
+    >
       <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
     theme === undefined ? {} : { theme },
@@ -252,7 +258,7 @@ describe('the last Level', () => {
       throw new Error('The last Level has no open cell');
     }
     const cells = solution.value.cells.map((cell, index) => (index === open ? 'empty' : cell));
-    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells }));
+    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells, seconds: [0] }));
 
     await renderRouter(
       {

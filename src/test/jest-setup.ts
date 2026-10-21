@@ -1,3 +1,6 @@
+import { installManualForeground } from '@/services/foreground';
+import { installManualPlayClock } from '@/services/play-clock';
+
 jest.mock('expo-sqlite/kv-store', () => {
   const memory = new Map<string, string>();
   Object.assign(globalThis, { __orangeutanSaveMemory: memory });
@@ -16,4 +19,6 @@ beforeEach(() => {
   const memory = (globalThis as { __orangeutanSaveMemory?: Map<string, string> })
     .__orangeutanSaveMemory;
   memory?.clear();
+  installManualPlayClock();
+  installManualForeground();
 });

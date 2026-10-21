@@ -52,6 +52,7 @@ Confirmed. Terms are in `GLOSSARY.md`. The sequence decision is in
 - Broken rules outline the involved cells while the player plays.
 - A quiet back control leaves an unfinished Level as it is.
 - The Celebration uses the current orangutan-and-orange drawing. Next continues. Home, after the last Level, shows the Score and Share.
+- Play time is the whole seconds spent on each Level while it is open and the app is in the foreground. Home shows the total throughout the sequence. The Score stays the count of solved Levels, shown only when every Level is solved, and is still the only shared number.
 - No undo and no reset. Hint can be added later.
 
 ---

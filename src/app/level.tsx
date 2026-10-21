@@ -5,7 +5,14 @@ import { LevelScreen, useLevelSession } from '@/features/level';
 
 export default function LevelRoute(): React.JSX.Element {
   const router = useRouter();
-  const { celebrate } = useLevelSession();
+  const { celebrate, setLevelOpen } = useLevelSession();
+
+  useEffect(() => {
+    setLevelOpen(true);
+    return () => {
+      setLevelOpen(false);
+    };
+  }, [setLevelOpen]);
 
   useEffect(() => {
     if (!celebrate) return;
