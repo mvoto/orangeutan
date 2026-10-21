@@ -38,6 +38,11 @@ const solvedLevelOne: LevelSessionState = {
     'orange',
   ],
   seconds: [0],
+  remembered: {
+    'no-three-in-a-row': false,
+    balance: false,
+    'edge-clues': false,
+  },
 };
 
 const routes = { _layout: RootLayout, home: HomeRoute, level: LevelRoute };
@@ -48,11 +53,12 @@ describe('resume', () => {
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     await screen.findByTestId('level-screen', {}, { timeout: 3000 });
+    await closeIntroduction();
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toBe(
-      '{"version":3,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0]}',
+      '{"version":3,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false}}',
     );
     expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeOnTheScreen();
@@ -94,6 +100,7 @@ describe('resume', () => {
     await act(() => {
       advancePlayClock();
     });
+    await closeIntroduction();
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
 
     expect(
@@ -122,7 +129,15 @@ describe('resume', () => {
 
   it('keeps solved seconds and starts the next Level at zero', async () => {
     const cells = solvedLevelOne.cells.map((cell, index) => (index === 2 ? 'empty' : cell));
-    Storage.setItemSync(saveKey, encodeSave({ puzzle: levelOne, cells, seconds: [0] }));
+    Storage.setItemSync(
+      saveKey,
+      encodeSave({
+        puzzle: levelOne,
+        cells,
+        seconds: [0],
+        remembered: solvedLevelOne.remembered,
+      }),
+    );
 
     await renderRouter({ ...routes, celebration: CelebrationRoute }, { initialUrl: '/home' });
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
@@ -132,6 +147,7 @@ describe('resume', () => {
       for (let second = 0; second < 10; second += 1) advancePlayClock();
     });
     expect(screen.getByLabelText('timer: 00:10')).toBeOnTheScreen();
+    await closeIntroduction();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
     expect(
@@ -148,6 +164,7 @@ describe('resume', () => {
     await act(() => {
       for (let second = 0; second < 20; second += 1) advancePlayClock();
     });
+    await closeIntroduction();
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     expect(
       await screen.findByLabelText('total timer: 00:30', {}, { timeout: 3000 }),
@@ -223,7 +240,12 @@ describe('resume', () => {
     seconds[0] = 4;
     Storage.setItemSync(
       saveKey,
-      encodeSave({ puzzle: last, cells: solution.value.cells, seconds }),
+      encodeSave({
+        puzzle: last,
+        cells: solution.value.cells,
+        seconds,
+        remembered: solvedLevelOne.remembered,
+      }),
     );
 
     await renderRouter(routes, { initialUrl: '/home' });
@@ -255,7 +277,12 @@ describe('resume', () => {
     if (!solution.ok) throw new Error('The last Level has no solution');
     Storage.setItemSync(
       saveKey,
-      encodeSave({ puzzle: last, cells: solution.value.cells, seconds: [0] }),
+      encodeSave({
+        puzzle: last,
+        cells: solution.value.cells,
+        seconds: [0],
+        remembered: solvedLevelOne.remembered,
+      }),
     );
 
     await renderRouter(routes, { initialUrl: '/home' });
@@ -287,3 +314,11 @@ describe('resume', () => {
     ).toBeOnTheScreen();
   });
 });
+
+async function closeIntroduction(): Promise<void> {
+  for (let step = 0; step < 3; step += 1) {
+    const close = screen.queryByRole('button', { name: 'Close' });
+    if (close === null) return;
+    await fireEvent.press(close);
+  }
+}
