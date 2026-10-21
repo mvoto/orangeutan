@@ -3,6 +3,8 @@ import type { Cell, Puzzle } from '@/engine';
 
 import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionState } from './level-session-state';
+import { noRulesRemembered, ruleOrder } from './rules';
+import type { RememberedRules, RuleId } from './rules';
 import { levelNumber, nextLevel, puzzleAt } from './sequence';
 
 const saveVersion = 3;
@@ -19,6 +21,7 @@ export function encodeSave(state: LevelSessionState): string {
     level: levelNumber(state.puzzle),
     cells: state.cells,
     seconds: state.seconds,
+    remembered: state.remembered,
   });
 }
 
@@ -56,6 +59,7 @@ function readSave(value: unknown): OpenedSave {
     puzzle,
     cells,
     seconds: secondsFor(levelNumber(puzzle), migrated.seconds),
+    remembered: rememberedFor(value),
   };
   // A solved Level is retired. The next launch continues at the following Level.
   if (nextLevel(restored.puzzle) !== null && isSolved(restored.puzzle, restored.cells)) {
@@ -68,6 +72,8 @@ function readSave(value: unknown): OpenedSave {
  * Version 3 is the current document. A higher version is left untouched.
  * Version 1 named Levels in the nearly full pack. Only Level 1 is the same Puzzle.
  * Version 2 has the grid and no Play time.
+ * Remembered rules are an optional field on this version. A missing field has introduced none.
+ * A higher version is still left untouched.
  */
 function migrate(value: unknown):
   | {
@@ -107,6 +113,17 @@ function secondsFor(level: number, raw: unknown): readonly number[] {
     seconds.push(value);
   }
   return seconds;
+}
+
+/** An older document has no record, so each rule still needs its one introduction. */
+function rememberedFor(value: unknown): RememberedRules {
+  if (typeof value !== 'object' || value === null) return noRulesRemembered;
+  const remembered = (value as { remembered?: unknown }).remembered;
+  if (typeof remembered !== 'object' || remembered === null) return noRulesRemembered;
+  const rules = remembered as Record<string, unknown>;
+  const read = {} as Record<RuleId, boolean>;
+  for (const rule of ruleOrder) read[rule] = rules[rule] === true;
+  return read;
 }
 
 function playable(state: LevelSessionState): OpenedSave {

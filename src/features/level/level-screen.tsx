@@ -1,4 +1,4 @@
-import { Fragment, memo, useMemo } from 'react';
+import { Fragment, memo, useMemo, useState } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
@@ -10,9 +10,16 @@ import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
 import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
-
-const levelOneCards = ['No three in a row', 'Balance'] as const;
-const levelTwoCards = ['No three in a row', 'Balance', 'Edge clues'] as const;
+import { RuleDiagram } from './rule-diagram';
+import {
+  firstUnseen,
+  oppositeMark,
+  ruleAfterClose,
+  ruleCopy,
+  rulesOnPuzzle,
+  sameMark,
+} from './rules';
+import type { RuleId } from './rules';
 
 type LevelScreenProps = {
   readonly onBack: () => void;
@@ -30,10 +37,13 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, clear, cycle, level, playSeconds, puzzle } = useLevelSession();
+  const { cells, clear, cycle, level, playSeconds, puzzle, remembered, remember } =
+    useLevelSession();
   const timer = playTimeLabel(playSeconds);
   const size = puzzle.size;
-  const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
+  const rules = useMemo(() => rulesOnPuzzle(puzzle), [puzzle]);
+  // The Level route remounts after the Celebration, so the first unremembered rule opens again.
+  const [openRule, setOpenRule] = useState<RuleId | null>(() => firstUnseen(puzzle, remembered));
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
   const headerStyle = useMemo(() => [styles.header, { gap: spacing.sm }], [spacing.sm]);
   const backArrowStyle = useMemo(
@@ -71,33 +81,75 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
     [colors.textPrimary],
   );
   const washes = useMemo(() => washStyles(colors), [colors]);
+  const sheetStyle = useMemo(
+    () => [
+      styles.card,
+      {
+        backgroundColor: colors.surface,
+        borderColor: colors.border,
+        borderRadius: radii.md,
+        padding: spacing.md,
+        marginTop: spacing.md,
+        gap: spacing.sm,
+      },
+    ],
+    [colors.surface, colors.border, radii.md, spacing.md, spacing.sm],
+  );
+  const dismiss = (): void => {
+    if (openRule === null) return;
+    if (!remembered[openRule]) remember(openRule);
+    setOpenRule(ruleAfterClose(puzzle, remembered, openRule));
+  };
+  const showRule = (rule: RuleId): void => {
+    if (rule === openRule) return;
+    setOpenRule(rule);
+  };
 
   return (
     <Screen testID="level-screen">
       <View style={headerStyle}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-          onPress={onBack}
-          hitSlop={spacing.sm}
-          style={styles.back}
-        >
-          <View
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={backArrowStyle}
-          />
-        </Pressable>
+        {openRule === null ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={onBack}
+            hitSlop={spacing.sm}
+            style={styles.back}
+          >
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={backArrowStyle}
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.back} />
+        )}
         <AppText>{`Level ${level}`}</AppText>
         <AppText accessibilityLabel={timer}>{timer}</AppText>
       </View>
       <View style={cardsStyle}>
-        {ruleCards.map((title) => (
-          <View key={title} style={cardStyle}>
-            <AppText>{title}</AppText>
-          </View>
+        {rules.map((rule) => (
+          <Pressable
+            key={rule}
+            accessibilityRole="button"
+            accessibilityLabel={ruleCopy[rule].title}
+            onPress={() => showRule(rule)}
+            style={cardStyle}
+          >
+            <RuleDiagram rule={rule} size={18} asImage={false} />
+            <AppText>{ruleCopy[rule].title}</AppText>
+          </Pressable>
         ))}
       </View>
+      {openRule === null ? null : (
+        <View style={sheetStyle}>
+          <AppText variant="display">{ruleCopy[openRule].title}</AppText>
+          <RuleDiagram rule={openRule} size={44} asImage />
+          <AppText variant="body">{ruleCopy[openRule].sentence}</AppText>
+          <Button label="Close" onPress={dismiss} />
+        </View>
+      )}
       <View style={gridStyle}>
         {Array.from({ length: size }, (_, row) => (
           <Fragment key={row}>
@@ -112,7 +164,7 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
                       row={row}
                       column={column}
                       cell={cell}
-                      onCycle={cycle}
+                      onCycle={openRule === null ? cycle : ignoreCycle}
                       style={outlined.has(index) ? brokenCellStyle : cellStyle}
                       wash={washes[cell]}
                     />
@@ -156,6 +208,8 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
     </Screen>
   );
 }
+
+function ignoreCycle(_index: number): void {}
 
 const GridCell = memo(function GridCell({
   index,
@@ -219,7 +273,7 @@ function EdgeMark({
       accessible
       accessibilityLabel={same ? 'Edge clue, same' : 'Edge clue, opposite'}
     >
-      <AppText>{same ? '=' : '×'}</AppText>
+      <AppText>{same ? sameMark : oppositeMark}</AppText>
     </View>
   );
 }

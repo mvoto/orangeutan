@@ -26,6 +26,11 @@ const solvedLevelOne: LevelSessionState = {
     'orange',
   ],
   seconds: [0],
+  remembered: {
+    'no-three-in-a-row': false,
+    balance: false,
+    'edge-clues': false,
+  },
 };
 
 describe('save', () => {
@@ -72,7 +77,12 @@ describe('save', () => {
       JSON.parse(encodeSave(levelSessionReducer(startingState(), { type: 'advance' }))).level,
     ).toBe(2);
     expect(() =>
-      encodeSave({ puzzle: stranger, cells: startingState().cells, seconds: [0] }),
+      encodeSave({
+        puzzle: stranger,
+        cells: startingState().cells,
+        seconds: [0],
+        remembered: startingState().remembered,
+      }),
     ).toThrow('Puzzle is not in the Level sequence');
   });
 

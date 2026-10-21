@@ -18,6 +18,7 @@ import type { SaveStore } from '@/services/save-store';
 
 import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionAction, LevelSessionState } from './level-session-state';
+import type { RememberedRules, RuleId } from './rules';
 import { encodeSave, openSave } from './save';
 import { levelNumber, nextLevel } from './sequence';
 
@@ -39,6 +40,8 @@ type LevelSession = {
   readonly playSeconds: number;
   /** Sum of Play time across every Level reached. */
   readonly playTime: number;
+  readonly remembered: RememberedRules;
+  readonly remember: (rule: RuleId) => void;
   readonly cycle: (index: number) => void;
   readonly clear: () => void;
   readonly advance: () => void;
@@ -122,6 +125,9 @@ export function LevelSessionProvider({
       // The session keeps running when the device cannot store it.
     }
   }, [state, store]);
+  const remember = useCallback((rule: RuleId) => {
+    dispatch({ type: 'remember', rule });
+  }, []);
   const cycle = useCallback((index: number) => {
     dispatch({ type: 'cycle', index });
   }, []);
@@ -148,6 +154,8 @@ export function LevelSessionProvider({
       level,
       playSeconds,
       playTime,
+      remembered: state.remembered,
+      remember,
       cycle,
       clear,
       advance,
@@ -163,6 +171,8 @@ export function LevelSessionProvider({
       level,
       playSeconds,
       playTime,
+      state.remembered,
+      remember,
       cycle,
       clear,
       advance,

@@ -64,8 +64,8 @@ describe('Level 1', () => {
   it('shows cards for no three in a row and balance', async () => {
     await renderLevel();
 
-    expect(screen.getByText('No three in a row')).toBeOnTheScreen();
-    expect(screen.getByText('Balance')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'No three in a row' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Balance' })).toBeOnTheScreen();
   });
 
   it('uses the approved tile washes and symbols instead of letters', async () => {
@@ -85,6 +85,7 @@ describe('Level 1', () => {
 
   it('cycles an empty cell through monkey and orange', async () => {
     await renderLevel();
+    await closeIntroduction();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
@@ -117,6 +118,7 @@ describe('Level 1', () => {
   it('outlines every cell in a broken row', async () => {
     expect(treehouseTheme.colors.border).toBe(treehouseTheme.colors.textPrimary);
     await renderLevel(treehouseTheme);
+    await closeIntroduction();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 3, column 1, empty' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Row 3, column 2, empty' }));
@@ -143,6 +145,7 @@ describe('Level 1', () => {
   it('outlines every cell in a broken column', async () => {
     expect(treehouseTheme.colors.border).toBe(treehouseTheme.colors.textPrimary);
     await renderLevel(treehouseTheme);
+    await closeIntroduction();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 2, column 1, empty' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Row 2, column 1, monkey' }));
@@ -175,6 +178,7 @@ describe('Level 1', () => {
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     await screen.findByTestId('level-screen', {}, { timeout: 3000 });
+    await closeIntroduction();
     expect(screen.getByRole('button', { name: 'Back' })).toBeOnTheScreen();
     expect(screen.queryByText('Back')).not.toBeOnTheScreen();
     expect(screen.getByText('Level 1')).toBeOnTheScreen();
@@ -214,6 +218,7 @@ describe('Level 1', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     await screen.findByTestId('level-screen', {}, { timeout: 3000 });
     expect(screen.queryByText('Edge clues')).not.toBeOnTheScreen();
+    await closeIntroduction();
 
     await fillLevelOne();
 
@@ -232,11 +237,16 @@ describe('Level 1', () => {
     const levelTwo = levelSequence[1];
     if (levelTwo === undefined) throw new Error('Level 2 is missing');
     const given = givenCell(levelTwo);
-    expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(
+      await screen.findByRole('button', { name: 'Edge clues' }, { timeout: 3000 }),
+    ).toBeOnTheScreen();
     expect(screen.getByText('Level 2')).toBeOnTheScreen();
     expect(screen.queryByText('Level 1')).not.toBeOnTheScreen();
-    expect(screen.getAllByText('=')).toHaveLength(2);
+    expect(screen.getAllByLabelText('Edge clue, same')).toHaveLength(2);
     expect(screen.getByRole('button', { name: given })).toBeOnTheScreen();
+    expect(screen.getByText('= means the same. × means different.')).toBeOnTheScreen();
+    expect(screen.queryByText('Not three of the same in a row or a column.')).not.toBeOnTheScreen();
+    await closeIntroduction();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
@@ -277,7 +287,19 @@ describe('the last Level', () => {
       throw new Error('The last Level has no open cell');
     }
     const cells = solution.value.cells.map((cell, index) => (index === open ? 'empty' : cell));
-    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells, seconds: [0] }));
+    Storage.setItemSync(
+      saveKey,
+      encodeSave({
+        puzzle: last,
+        cells,
+        seconds: [0],
+        remembered: {
+          'no-three-in-a-row': false,
+          balance: false,
+          'edge-clues': false,
+        },
+      }),
+    );
 
     await renderRouter(
       {
@@ -294,6 +316,7 @@ describe('the last Level', () => {
     expect(
       await screen.findByText(`Level ${levelSequence.length}`, {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
+    await closeIntroduction();
     const row = Math.floor(open / last.size) + 1;
     const column = (open % last.size) + 1;
     const marks = ['empty', 'monkey', 'orange'] as const;
@@ -327,6 +350,14 @@ describe('the last Level', () => {
     expect(share).toHaveBeenCalledWith({ message: String(levelSequence.length) });
   });
 });
+
+async function closeIntroduction(): Promise<void> {
+  for (let step = 0; step < 3; step += 1) {
+    const close = screen.queryByRole('button', { name: 'Close' });
+    if (close === null) return;
+    await fireEvent.press(close);
+  }
+}
 
 function givenCell(puzzle: Puzzle): string {
   const index = puzzle.givens.findIndex((given) => given !== null);

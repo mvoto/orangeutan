@@ -49,7 +49,7 @@ ranking are in `docs/adr/0002-anonymous-play.md`.
 - Tap a cell to cycle: empty → monkey → orange → empty. Givens do not change.
 - Level 1 is 4×4, has no Edge clues, and starts with at least one monkey and one orange Given.
 - Edge clues begin on the first 6×6. Within a size, more Givens come first.
-- Rule cards for the rules that Puzzle uses sit on every Level.
+- Illustrated cards for the rules that Puzzle uses sit on every Level. Tapping a card opens a sheet with the same diagram and one sentence. The sheet opens on its own the first time that rule is available, and closing it remembers the rule.
 - Broken rules outline the involved cells while the player plays.
 - A quiet back control leaves an unfinished Level as it is.
 - The Celebration uses the current orangutan-and-orange drawing. Next continues. Home, after the last Level, shows the Score and Share.
