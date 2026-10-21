@@ -22,6 +22,8 @@ type LevelSession = {
   readonly finished: boolean;
   /** How many Levels are solved. Present only when every Level is solved. */
   readonly score: number | null;
+  /** 1-based place of the open Puzzle in the sequence. */
+  readonly level: number;
   readonly cycle: (index: number) => void;
   readonly advance: () => void;
 };
@@ -65,7 +67,8 @@ export function LevelSessionProvider({
   const solved = isSolved(state.puzzle, state.cells);
   const finished = solved && nextLevel(state.puzzle) === null;
   const celebrate = solved;
-  const score = finished ? levelNumber(state.puzzle) : null;
+  const level = levelNumber(state.puzzle);
+  const score = finished ? level : null;
   const session = useMemo(
     () => ({
       puzzle: state.puzzle,
@@ -74,10 +77,11 @@ export function LevelSessionProvider({
       celebrate,
       finished,
       score,
+      level,
       cycle,
       advance,
     }),
-    [state.puzzle, state.cells, solved, celebrate, finished, score, cycle, advance],
+    [state.puzzle, state.cells, solved, celebrate, finished, score, level, cycle, advance],
   );
 
   return <LevelSessionContext.Provider value={session}>{children}</LevelSessionContext.Provider>;

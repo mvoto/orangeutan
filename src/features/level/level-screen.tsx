@@ -7,7 +7,7 @@ import { brokenLines, cellIndex } from '@/engine';
 import type { Cell, EdgeClue } from '@/engine';
 import type { ColorTokens } from '@/theme';
 import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
-import { AppText, Button, Screen } from '@/ui';
+import { AppText, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
 
@@ -30,10 +30,15 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, cycle, puzzle } = useLevelSession();
+  const { cells, cycle, level, puzzle } = useLevelSession();
   const size = puzzle.size;
   const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
+  const headerStyle = useMemo(() => [styles.header, { gap: spacing.sm }], [spacing.sm]);
+  const backArrowStyle = useMemo(
+    () => [styles.arrow, { borderColor: colors.textSecondary }],
+    [colors.textSecondary],
+  );
   const cardsStyle = useMemo(
     () => [styles.cards, { gap: spacing.sm, marginTop: spacing.md }],
     [spacing.sm, spacing.md],
@@ -64,7 +69,22 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
 
   return (
     <Screen testID="level-screen">
-      <Button label="Back" onPress={onBack} />
+      <View style={headerStyle}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={onBack}
+          hitSlop={spacing.sm}
+          style={styles.back}
+        >
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={backArrowStyle}
+          />
+        </Pressable>
+        <AppText>{`Level ${level}`}</AppText>
+      </View>
       <View style={cardsStyle}>
         {ruleCards.map((title) => (
           <View key={title} style={cardStyle}>
@@ -219,6 +239,15 @@ function symbolXml(cell: Cell): string | null {
 }
 
 const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  back: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  arrow: {
+    width: 10,
+    height: 10,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    transform: [{ rotate: '45deg' }],
+  },
   cards: { flexDirection: 'row', flexWrap: 'wrap' },
   card: { borderWidth: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },

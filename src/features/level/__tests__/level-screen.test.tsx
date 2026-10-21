@@ -146,8 +146,13 @@ describe('Level 1', () => {
     );
 
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    expect(screen.getByText('Level 1')).toBeOnTheScreen();
+    expect(screen.queryByText('Score')).not.toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     await screen.findByTestId('level-screen', {}, { timeout: 3000 });
+    expect(screen.getByRole('button', { name: 'Back' })).toBeOnTheScreen();
+    expect(screen.queryByText('Back')).not.toBeOnTheScreen();
+    expect(screen.getByText('Level 1')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
@@ -156,11 +161,14 @@ describe('Level 1', () => {
 
     expect(await screen.findByTestId('home-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(router.getPathname()).toBe('/home');
+    expect(screen.getByText('Level 1')).toBeOnTheScreen();
+    expect(screen.queryByText('Score')).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     expect(
       await screen.findByRole('button', { name: 'Row 1, column 3, monkey' }, { timeout: 3000 }),
     ).toBeOnTheScreen();
+    expect(screen.getByText('Level 1')).toBeOnTheScreen();
   });
 
   it('celebrates a solved Level 1 and opens Level 2 instead of replaying it', async () => {
@@ -188,6 +196,8 @@ describe('Level 1', () => {
       backgroundColor: '#FDBF4E',
     });
     expect(screen.queryByRole('button', { name: 'Back' })).not.toBeOnTheScreen();
+    expect(screen.getByText('Level 1')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeOnTheScreen();
     expect(mockCelebrationPlayer.muted).toBe(true);
     expect(mockCelebrationPlayer.play).toHaveBeenCalled();
     expect(screen.queryByTestId('level-screen')).not.toBeOnTheScreen();
@@ -198,11 +208,15 @@ describe('Level 1', () => {
     if (levelTwo === undefined) throw new Error('Level 2 is missing');
     const given = givenCell(levelTwo);
     expect(await screen.findByText('Edge clues', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.getByText('Level 2')).toBeOnTheScreen();
+    expect(screen.queryByText('Level 1')).not.toBeOnTheScreen();
     expect(screen.getAllByText('=')).toHaveLength(2);
     expect(screen.getByRole('button', { name: given })).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    expect(screen.getByText('Level 2')).toBeOnTheScreen();
+    expect(screen.queryByText('Score')).not.toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
 
     expect(await screen.findByRole('button', { name: given }, { timeout: 3000 })).toBeOnTheScreen();
@@ -214,10 +228,12 @@ describe('Level 1', () => {
       await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'Next' })).toBeOnTheScreen();
+    expect(screen.getByText('Level 2')).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Home' })).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
     expect(await screen.findByTestId('level-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.getByText('Level 3')).toBeOnTheScreen();
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
   });
 });
@@ -250,6 +266,9 @@ describe('the last Level', () => {
 
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
+    expect(
+      await screen.findByText(`Level ${levelSequence.length}`, {}, { timeout: 3000 }),
+    ).toBeOnTheScreen();
     const row = Math.floor(open / last.size) + 1;
     const column = (open % last.size) + 1;
     const marks = ['empty', 'monkey', 'orange'] as const;
@@ -268,12 +287,14 @@ describe('the last Level', () => {
       await screen.findByTestId('celebration-screen', {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'Home' })).toBeOnTheScreen();
+    expect(screen.getByText(`Level ${levelSequence.length}`)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Next' })).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Home' }));
 
     expect(await screen.findByTestId('home-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
+    expect(screen.queryByText(`Level ${levelSequence.length}`)).not.toBeOnTheScreen();
     expect(screen.getByText('Score')).toBeOnTheScreen();
     expect(screen.getByText(String(levelSequence.length))).toBeOnTheScreen();
 

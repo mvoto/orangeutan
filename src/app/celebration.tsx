@@ -5,14 +5,15 @@ import { useLevelSession } from '@/features/level';
 
 export default function CelebrationRoute(): React.JSX.Element {
   const router = useRouter();
-  const { advance, finished } = useLevelSession();
+  const { advance, finished, level } = useLevelSession();
 
   if (finished) {
-    return <CelebrationScreen onHome={() => router.replace('/home')} />;
+    return <CelebrationScreen level={level} onHome={() => router.replace('/home')} />;
   }
 
   return (
     <CelebrationScreen
+      level={level}
       onNext={() => {
         advance();
         router.replace('/level');

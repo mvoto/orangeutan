@@ -6,26 +6,26 @@ import { HomeScreen } from '../home-screen';
 
 describe('<HomeScreen />', () => {
   it('offers a PLAY button', async () => {
-    await renderWithTheme(<HomeScreen />);
+    await renderWithTheme(<HomeScreen level={1} />);
 
     expect(screen.getByRole('button', { name: 'PLAY' })).toBeOnTheScreen();
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
   });
 
   it('shows a Settings control', async () => {
-    await renderWithTheme(<HomeScreen />);
+    await renderWithTheme(<HomeScreen level={1} />);
 
     expect(screen.getByRole('button', { name: 'Settings' })).toBeOnTheScreen();
   });
 
   it('shows the orangutan holding an orange', async () => {
-    await renderWithTheme(<HomeScreen />);
+    await renderWithTheme(<HomeScreen level={1} />);
 
     expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toBeOnTheScreen();
   });
 
   it('sizes the drawing to its frame so PLAY stays on screen', async () => {
-    await renderWithTheme(<HomeScreen />);
+    await renderWithTheme(<HomeScreen level={1} />);
 
     expect(screen.getByTestId('mascot-frame')).toHaveStyle({
       maxWidth: 320,

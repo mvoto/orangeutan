@@ -5,12 +5,13 @@ import { useLevelSession } from '@/features/level';
 import { deviceScoreShare } from '@/services/score-share';
 
 export default function HomeRoute(): React.JSX.Element {
-  const { finished, score } = useLevelSession();
+  const { finished, level, score } = useLevelSession();
 
   return (
     <HomeScreen
       onPlay={() => router.push('/level')}
       finished={finished}
+      level={level}
       score={score}
       onShare={() => {
         if (score === null) return;

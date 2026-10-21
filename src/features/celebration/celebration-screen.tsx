@@ -1,7 +1,9 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { Button, Screen } from '@/ui';
+import { useTheme } from '@/theme';
+import { AppText, Button, Screen } from '@/ui';
 
 /** The clip ships on this gold. Other Celebration chrome stays on the existing button. */
 const celebrationGold = '#FDBF4E';
@@ -12,11 +14,18 @@ const noAction = (): void => undefined;
 export const celebrationClip = require('../../../assets/orangeutan_celebration1.mp4') as number;
 
 type CelebrationScreenProps = {
+  readonly level: number;
   readonly onNext?: () => void;
   readonly onHome?: () => void;
 };
 
-export function CelebrationScreen({ onNext, onHome }: CelebrationScreenProps): React.JSX.Element {
+export function CelebrationScreen({
+  level,
+  onNext,
+  onHome,
+}: CelebrationScreenProps): React.JSX.Element {
+  const { spacing } = useTheme();
+  const nextStyle = useMemo(() => [styles.next, { gap: spacing.sm }], [spacing.sm]);
   const player = useVideoPlayer(celebrationClip, (ready) => {
     ready.muted = true;
     ready.loop = false;
@@ -32,7 +41,8 @@ export function CelebrationScreen({ onNext, onHome }: CelebrationScreenProps): R
         contentFit="contain"
         accessibilityLabel="Orangutan and orange celebrating"
       />
-      <View style={styles.next}>
+      <View style={nextStyle}>
+        <AppText>{`Level ${level}`}</AppText>
         <Button
           label={onHome === undefined ? 'Next' : 'Home'}
           emphasis="primary"
@@ -46,5 +56,10 @@ export function CelebrationScreen({ onNext, onHome }: CelebrationScreenProps): R
 const styles = StyleSheet.create({
   screen: { backgroundColor: celebrationGold, padding: 0 },
   clip: { flex: 1 },
-  next: { padding: 16, alignItems: 'center' },
+  next: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
 });
