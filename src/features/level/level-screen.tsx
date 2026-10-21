@@ -30,10 +30,11 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, cycle, puzzle } = useLevelSession();
+  const { cells, cycle, level, puzzle } = useLevelSession();
   const size = puzzle.size;
   const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
+  const headerStyle = useMemo(() => [styles.header, { gap: spacing.sm }], [spacing.sm]);
   const cardsStyle = useMemo(
     () => [styles.cards, { gap: spacing.sm, marginTop: spacing.md }],
     [spacing.sm, spacing.md],
@@ -64,7 +65,12 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
 
   return (
     <Screen testID="level-screen">
-      <Button label="Back" onPress={onBack} />
+      <View style={headerStyle}>
+        <View style={styles.back}>
+          <Button label="Back" onPress={onBack} />
+        </View>
+        <AppText>{`Level ${level}`}</AppText>
+      </View>
       <View style={cardsStyle}>
         {ruleCards.map((title) => (
           <View key={title} style={cardStyle}>
@@ -219,6 +225,8 @@ function symbolXml(cell: Cell): string | null {
 }
 
 const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center' },
+  back: { flex: 1 },
   cards: { flexDirection: 'row', flexWrap: 'wrap' },
   card: { borderWidth: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },

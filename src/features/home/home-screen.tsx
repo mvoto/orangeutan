@@ -13,6 +13,8 @@ type HomeScreenProps = {
   /** Every Level is solved, so PLAY stays gone and the Score is visible. */
   readonly finished?: boolean;
   readonly score?: number | null;
+  /** Current Level. Shown with PLAY, and hidden once the Score replaces it. */
+  readonly level: number;
   readonly onShare?: () => void;
 };
 
@@ -21,6 +23,7 @@ export function HomeScreen({
   onPlay = noAction,
   finished = false,
   score = null,
+  level,
   onShare = noAction,
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
@@ -28,6 +31,7 @@ export function HomeScreen({
   return (
     <Screen testID="home-screen">
       <View style={styles.settingsRow}>
+        {finished ? null : <AppText style={styles.level}>{`Level ${level}`}</AppText>}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Settings"
@@ -66,8 +70,15 @@ export function HomeScreen({
 }
 
 const styles = StyleSheet.create({
-  settingsRow: { alignItems: 'flex-end' },
-  settingsButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  settingsRow: { flexDirection: 'row', alignItems: 'center' },
+  level: { marginRight: 'auto' },
+  settingsButton: {
+    marginLeft: 'auto',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   // The frame owns the size. Image would otherwise lay out at the file's 1152px height and push PLAY off the screen.
   mascotFrame: {
