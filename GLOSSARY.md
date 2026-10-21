@@ -31,3 +31,15 @@ _Avoid_: victory, win screen, picture
 **Score**:
 How many Levels the player has solved. It is shown only when every Level is solved.
 _Avoid_: points, stars, time
+
+**Play time**:
+Whole seconds the player has a Level open while the app is in the foreground. Each Level has its own timer, shown as `timer: 00:01`. Home shows the sum of those timers, including the Level in progress, as `total timer: 00:30`.
+_Avoid_: score, points, rank, stars
+
+**Nickname**:
+The public name on a Rank. The game assigns it, and the player may change it.
+_Avoid_: username, profile, avatar
+
+**Rank**:
+A player's place for one Level, ordered by that Level's Play time.
+_Avoid_: score, leaderboard, total

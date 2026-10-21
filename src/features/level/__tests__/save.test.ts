@@ -25,6 +25,7 @@ const solvedLevelOne: LevelSessionState = {
     'orange',
     'orange',
   ],
+  seconds: [0],
 };
 
 describe('save', () => {
@@ -56,7 +57,7 @@ describe('save', () => {
   });
 
   it('leaves a newer save on disk', () => {
-    const newer = '{"version":3,"level":1,"cells":[]}';
+    const newer = '{"version":4,"level":1,"cells":[]}';
     const opened = openSave(newer);
 
     expect(opened.state).toEqual(startingState());
@@ -70,9 +71,9 @@ describe('save', () => {
     expect(
       JSON.parse(encodeSave(levelSessionReducer(startingState(), { type: 'advance' }))).level,
     ).toBe(2);
-    expect(() => encodeSave({ puzzle: stranger, cells: startingState().cells })).toThrow(
-      'Puzzle is not in the Level sequence',
-    );
+    expect(() =>
+      encodeSave({ puzzle: stranger, cells: startingState().cells, seconds: [0] }),
+    ).toThrow('Puzzle is not in the Level sequence');
   });
 
   it('retires a solved Level 1 as Level 2', () => {

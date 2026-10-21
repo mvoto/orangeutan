@@ -8,6 +8,8 @@ import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
 import { logicalSolution } from '@/engine';
 import type { Puzzle } from '@/engine';
+import { deviceForeground } from '@/services/foreground';
+import { devicePlayClock } from '@/services/play-clock';
 import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
 import type { Theme } from '@/theme';
@@ -15,6 +17,7 @@ import { treehouseTheme } from '@/theme';
 
 import { LevelScreen } from '../level-screen';
 import { LevelSessionProvider } from '../level-session';
+import { levelSessionReducer, startingState } from '../level-session-state';
 import { encodeSave } from '../save';
 import { levelSequence } from '../sequence';
 
@@ -46,7 +49,11 @@ jest.mock('expo-video', () => ({
 
 function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
   return renderWithTheme(
-    <LevelSessionProvider store={deviceSaveStore}>
+    <LevelSessionProvider
+      store={deviceSaveStore}
+      clock={devicePlayClock}
+      foreground={deviceForeground}
+    >
       <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
     theme === undefined ? {} : { theme },
@@ -87,6 +94,24 @@ describe('Level 1', () => {
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, orange' }));
     expect(screen.getByRole('button', { name: 'Row 1, column 3, empty' })).toBeOnTheScreen();
+  });
+
+  it('clears the board and leaves the Level timer', async () => {
+    const played = levelSessionReducer(
+      { ...startingState(), seconds: [7] },
+      { type: 'cycle', index: 2 },
+    );
+    Storage.setItemSync(saveKey, encodeSave(played));
+    await renderLevel();
+
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:07')).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(screen.getByRole('button', { name: 'Row 1, column 3, empty' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Row 1, column 1, orange' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('timer: 00:07')).toBeOnTheScreen();
   });
 
   it('outlines every cell in a broken row', async () => {
@@ -252,7 +277,7 @@ describe('the last Level', () => {
       throw new Error('The last Level has no open cell');
     }
     const cells = solution.value.cells.map((cell, index) => (index === open ? 'empty' : cell));
-    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells }));
+    Storage.setItemSync(saveKey, encodeSave({ puzzle: last, cells, seconds: [0] }));
 
     await renderRouter(
       {

@@ -1,8 +1,19 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { isSolved } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
+import type { Foreground } from '@/services/foreground';
+import type { PlayClock } from '@/services/play-clock';
 import type { SaveStore } from '@/services/save-store';
 
 import { levelSessionReducer, startingState } from './level-session-state';
@@ -24,8 +35,14 @@ type LevelSession = {
   readonly score: number | null;
   /** 1-based place of the open Puzzle in the sequence. */
   readonly level: number;
+  /** Whole seconds on the open Level. */
+  readonly playSeconds: number;
+  /** Sum of Play time across every Level reached. */
+  readonly playTime: number;
   readonly cycle: (index: number) => void;
+  readonly clear: () => void;
   readonly advance: () => void;
+  readonly setLevelOpen: (open: boolean) => void;
 };
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
@@ -47,8 +64,55 @@ function storedSessionReducer(state: StoredSession, action: LevelSessionAction):
 export function LevelSessionProvider({
   children,
   store,
-}: PropsWithChildren<{ readonly store: SaveStore }>): React.JSX.Element {
+  clock,
+  foreground,
+}: PropsWithChildren<{
+  readonly store: SaveStore;
+  readonly clock: PlayClock;
+  readonly foreground: Foreground;
+}>): React.JSX.Element {
   const [state, dispatch] = useReducer(storedSessionReducer, store, readSession);
+  const [levelOpen, setLevelOpenState] = useState(false);
+  const [inForeground, setInForeground] = useState(() => foreground.now());
+  const levelOpenRef = useRef(false);
+  const stopClock = useRef<(() => void) | null>(null);
+  const stop = useCallback(() => {
+    stopClock.current?.();
+    stopClock.current = null;
+  }, []);
+
+  const setLevelOpen = useCallback(
+    (open: boolean) => {
+      levelOpenRef.current = open;
+      if (!open) stop();
+      setLevelOpenState(open);
+    },
+    [stop],
+  );
+
+  useEffect(
+    () =>
+      foreground.subscribe((active) => {
+        if (!active) stop();
+        setInForeground(active);
+      }),
+    [foreground, stop],
+  );
+
+  const solved = isSolved(state.puzzle, state.cells);
+  useEffect(() => {
+    if (!levelOpen || !inForeground || solved) return;
+    const stopTicking = clock.start(() => {
+      // A second already in flight must not count after Back or after leaving the foreground.
+      if (!levelOpenRef.current || !foreground.now()) return;
+      dispatch({ type: 'tick' });
+    });
+    stopClock.current = stopTicking;
+    return () => {
+      stopTicking();
+      if (stopClock.current === stopTicking) stopClock.current = null;
+    };
+  }, [clock, foreground, levelOpen, inForeground, solved]);
 
   useEffect(() => {
     if (state.preserveDocument) return;
@@ -61,14 +125,18 @@ export function LevelSessionProvider({
   const cycle = useCallback((index: number) => {
     dispatch({ type: 'cycle', index });
   }, []);
+  const clear = useCallback(() => {
+    dispatch({ type: 'clear' });
+  }, []);
   const advance = useCallback(() => {
     dispatch({ type: 'advance' });
   }, []);
-  const solved = isSolved(state.puzzle, state.cells);
   const finished = solved && nextLevel(state.puzzle) === null;
   const celebrate = solved;
   const level = levelNumber(state.puzzle);
   const score = finished ? level : null;
+  const playSeconds = state.seconds[state.seconds.length - 1] ?? 0;
+  const playTime = state.seconds.reduce((sum, value) => sum + value, 0);
   const session = useMemo(
     () => ({
       puzzle: state.puzzle,
@@ -78,10 +146,28 @@ export function LevelSessionProvider({
       finished,
       score,
       level,
+      playSeconds,
+      playTime,
       cycle,
+      clear,
       advance,
+      setLevelOpen,
     }),
-    [state.puzzle, state.cells, solved, celebrate, finished, score, level, cycle, advance],
+    [
+      state.puzzle,
+      state.cells,
+      solved,
+      celebrate,
+      finished,
+      score,
+      level,
+      playSeconds,
+      playTime,
+      cycle,
+      clear,
+      advance,
+      setLevelOpen,
+    ],
   );
 
   return <LevelSessionContext.Provider value={session}>{children}</LevelSessionContext.Provider>;

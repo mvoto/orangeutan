@@ -21,6 +21,17 @@ describe('level session state', () => {
     expect(given.cells[2]).toBe('empty');
   });
 
+  it('clears the board and keeps the Level timer', () => {
+    const start = startingState();
+    const played = levelSessionReducer({ ...start, seconds: [7] }, { type: 'cycle', index: 2 });
+
+    const cleared = levelSessionReducer(played, { type: 'clear' });
+
+    expect(cleared.cells).toEqual(start.cells);
+    expect(cleared.puzzle).toBe(played.puzzle);
+    expect(cleared.seconds).toEqual([7]);
+  });
+
   it('retires Level 1 by opening Level 2', () => {
     const next = levelSessionReducer(startingState(), { type: 'advance' });
 

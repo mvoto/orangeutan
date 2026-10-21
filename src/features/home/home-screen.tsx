@@ -1,7 +1,7 @@
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
-import { AppText, Button, Screen } from '@/ui';
+import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
 const noAction = (): void => undefined;
 
@@ -15,23 +15,28 @@ type HomeScreenProps = {
   readonly score?: number | null;
   /** Current Level. Shown with PLAY, and hidden once the Score replaces it. */
   readonly level: number;
+  /** Sum of Play time across every Level reached. */
+  readonly playTime: number;
   readonly onShare?: () => void;
 };
 
-/** First screen after loading. Settings waits for a later milestone. */
+/** First screen after loading. This gear stays inert until release, when it becomes Privacy and Support. See docs/adr/0002-anonymous-play.md. */
 export function HomeScreen({
   onPlay = noAction,
   finished = false,
   score = null,
   level,
+  playTime,
   onShare = noAction,
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
+  const timer = playTimeLabel(playTime, 'total');
 
   return (
     <Screen testID="home-screen">
       <View style={styles.settingsRow}>
         {finished ? null : <AppText style={styles.level}>{`Level ${level}`}</AppText>}
+        <AppText accessibilityLabel={timer}>{timer}</AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Settings"
