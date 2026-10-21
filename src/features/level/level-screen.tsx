@@ -7,7 +7,7 @@ import { brokenLines, cellIndex } from '@/engine';
 import type { Cell, EdgeClue } from '@/engine';
 import type { ColorTokens } from '@/theme';
 import { compactOrangeSvg, grinMonkeySvg, useTheme } from '@/theme';
-import { AppText, Button, Screen } from '@/ui';
+import { AppText, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
 
@@ -35,6 +35,10 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const ruleCards = puzzle.edgeClues.length > 0 ? levelTwoCards : levelOneCards;
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
   const headerStyle = useMemo(() => [styles.header, { gap: spacing.sm }], [spacing.sm]);
+  const backArrowStyle = useMemo(
+    () => [styles.arrow, { borderColor: colors.textSecondary }],
+    [colors.textSecondary],
+  );
   const cardsStyle = useMemo(
     () => [styles.cards, { gap: spacing.sm, marginTop: spacing.md }],
     [spacing.sm, spacing.md],
@@ -66,9 +70,19 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   return (
     <Screen testID="level-screen">
       <View style={headerStyle}>
-        <View style={styles.back}>
-          <Button label="Back" onPress={onBack} />
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          onPress={onBack}
+          hitSlop={spacing.sm}
+          style={styles.back}
+        >
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={backArrowStyle}
+          />
+        </Pressable>
         <AppText>{`Level ${level}`}</AppText>
       </View>
       <View style={cardsStyle}>
@@ -225,8 +239,15 @@ function symbolXml(cell: Cell): string | null {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center' },
-  back: { flex: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  back: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  arrow: {
+    width: 10,
+    height: 10,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    transform: [{ rotate: '45deg' }],
+  },
   cards: { flexDirection: 'row', flexWrap: 'wrap' },
   card: { borderWidth: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },

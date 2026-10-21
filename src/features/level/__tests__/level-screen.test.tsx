@@ -150,6 +150,8 @@ describe('Level 1', () => {
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
     await screen.findByTestId('level-screen', {}, { timeout: 3000 });
+    expect(screen.getByRole('button', { name: 'Back' })).toBeOnTheScreen();
+    expect(screen.queryByText('Back')).not.toBeOnTheScreen();
     expect(screen.getByText('Level 1')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Row 1, column 3, empty' }));
