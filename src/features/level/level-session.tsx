@@ -74,22 +74,43 @@ export function LevelSessionProvider({
   const [levelOpen, setLevelOpenState] = useState(false);
   const [inForeground, setInForeground] = useState(() => foreground.now());
   const levelOpenRef = useRef(false);
-
-  const setLevelOpen = useCallback((open: boolean) => {
-    levelOpenRef.current = open;
-    setLevelOpenState(open);
+  const stopClock = useRef<(() => void) | null>(null);
+  const stop = useCallback(() => {
+    stopClock.current?.();
+    stopClock.current = null;
   }, []);
 
-  useEffect(() => foreground.subscribe(setInForeground), [foreground]);
+  const setLevelOpen = useCallback(
+    (open: boolean) => {
+      levelOpenRef.current = open;
+      if (!open) stop();
+      setLevelOpenState(open);
+    },
+    [stop],
+  );
+
+  useEffect(
+    () =>
+      foreground.subscribe((active) => {
+        if (!active) stop();
+        setInForeground(active);
+      }),
+    [foreground, stop],
+  );
 
   const solved = isSolved(state.puzzle, state.cells);
   useEffect(() => {
     if (!levelOpen || !inForeground || solved) return;
-    return clock.start(() => {
-      // A second already queued must not count after Back or after the app leaves the foreground.
+    const stopTicking = clock.start(() => {
+      // A second already in flight must not count after Back or after leaving the foreground.
       if (!levelOpenRef.current || !foreground.now()) return;
       dispatch({ type: 'tick' });
     });
+    stopClock.current = stopTicking;
+    return () => {
+      stopTicking();
+      if (stopClock.current === stopTicking) stopClock.current = null;
+    };
   }, [clock, foreground, levelOpen, inForeground, solved]);
 
   useEffect(() => {

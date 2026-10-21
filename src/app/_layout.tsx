@@ -8,8 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { LevelSessionProvider } from '@/features/level';
-import { currentForeground } from '@/services/foreground';
-import { currentPlayClock } from '@/services/play-clock';
+import { deviceForeground } from '@/services/foreground';
+import { devicePlayClock } from '@/services/play-clock';
 import { deviceSaveStore } from '@/services/save-store';
 import { treehouseTheme, treehouseType, ThemeProvider } from '@/theme';
 import { ErrorFallback } from '@/ui';
@@ -54,8 +54,8 @@ export default function RootLayout(): React.JSX.Element | null {
     <ThemeProvider theme={treehouseTheme}>
       <LevelSessionProvider
         store={deviceSaveStore}
-        clock={currentPlayClock()}
-        foreground={currentForeground()}
+        clock={devicePlayClock}
+        foreground={deviceForeground}
       >
         <StatusBar style="dark" />
         <Stack

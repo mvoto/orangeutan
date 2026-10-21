@@ -114,8 +114,6 @@ describe('resume', () => {
     ).toBeOnTheScreen();
     await act(() => {
       setForegroundForTest(false);
-    });
-    await act(() => {
       advancePlayClock();
     });
     expect(screen.getByLabelText('1 seconds on this Level')).toBeOnTheScreen();

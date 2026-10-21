@@ -7,19 +7,7 @@ export type Foreground = {
   subscribe(listener: Listener): () => void;
 };
 
-const listeners = new Set<Listener>();
-let active = true;
-
-const manualForeground: Foreground = {
-  now: () => active,
-  subscribe(listener) {
-    listeners.add(listener);
-    return () => {
-      listeners.delete(listener);
-    };
-  },
-};
-
+/** Platform foreground. `inactive` and `background` do not count. Tests replace this module. */
 export const deviceForeground: Foreground = {
   now: () => AppState.currentState === 'active',
   subscribe(listener) {
@@ -32,20 +20,7 @@ export const deviceForeground: Foreground = {
   },
 };
 
-let foreground: Foreground = deviceForeground;
-
-/** The foreground signal the root passes into the level session. Tests replace it. */
-export function currentForeground(): Foreground {
-  return foreground;
-}
-
-export function installManualForeground(): void {
-  active = true;
-  listeners.clear();
-  foreground = manualForeground;
-}
-
-export function setForegroundForTest(next: boolean): void {
-  active = next;
-  for (const listener of [...listeners]) listener(next);
+/** Present so tests can import it. The test build replaces this module. */
+export function setForegroundForTest(_active: boolean): void {
+  throw new Error('The foreground signal changes only in tests');
 }
