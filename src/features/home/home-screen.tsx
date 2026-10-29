@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
@@ -18,9 +19,11 @@ type HomeScreenProps = {
   /** Sum of Play time across every Level reached. */
   readonly playTime: number;
   readonly onShare?: () => void;
+  /** Opens Privacy and Support. Home does not own that copy. */
+  readonly onPrivacy?: () => void;
 };
 
-/** First screen after loading. This gear stays inert until release, when it becomes Privacy and Support. See docs/adr/0002-anonymous-play.md. */
+/** First screen after loading. The gear opens the Privacy policy and Support. See docs/adr/0002-anonymous-play.md. */
 export function HomeScreen({
   onPlay = noAction,
   finished = false,
@@ -28,28 +31,30 @@ export function HomeScreen({
   level,
   playTime,
   onShare = noAction,
+  onPrivacy = noAction,
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
   const timer = playTimeLabel(playTime, 'total');
+  const centerStyle = useMemo(() => [styles.center, { gap: spacing.lg }], [spacing.lg]);
 
   return (
     <Screen testID="home-screen">
-      <View style={styles.settingsRow}>
+      <View style={styles.statusRow}>
         {finished ? null : <AppText style={styles.level}>{`Level ${level}`}</AppText>}
         <AppText accessibilityLabel={timer}>{timer}</AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Settings"
-          onPress={noAction}
+          accessibilityLabel="Privacy and Support"
+          onPress={onPrivacy}
           hitSlop={spacing.sm}
-          style={styles.settingsButton}
+          style={styles.gearButton}
         >
           <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             <AppText>⚙</AppText>
           </View>
         </Pressable>
       </View>
-      <View style={[styles.center, { gap: spacing.lg }]}>
+      <View style={centerStyle}>
         <View style={styles.mascotFrame} testID="mascot-frame">
           <Image
             accessible
@@ -75,9 +80,9 @@ export function HomeScreen({
 }
 
 const styles = StyleSheet.create({
-  settingsRow: { flexDirection: 'row', alignItems: 'center' },
+  statusRow: { flexDirection: 'row', alignItems: 'center' },
   level: { marginRight: 'auto' },
-  settingsButton: {
+  gearButton: {
     marginLeft: 'auto',
     minWidth: 44,
     minHeight: 44,

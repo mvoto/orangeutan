@@ -18,6 +18,7 @@ export default function HomeRoute(): React.JSX.Element {
         if (score === null) return;
         void deviceScoreShare.share(score).catch(() => undefined);
       }}
+      onPrivacy={() => router.push('/privacy')}
     />
   );
 }
