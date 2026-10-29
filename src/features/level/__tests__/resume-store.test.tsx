@@ -56,7 +56,7 @@ describe('resume store', () => {
   });
 
   it('does not replace a newer save', async () => {
-    const newer = '{"version":4,"level":4,"cells":["orange"]}';
+    const newer = '{"version":5,"level":4,"cells":["orange"]}';
     const store = memoryStore(newer);
 
     await render(

@@ -58,7 +58,7 @@ describe('resume', () => {
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toBe(
-      '{"version":3,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false}}',
+      '{"version":4,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false},"nickname":"Calm Orangutan"}',
     );
     expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeOnTheScreen();
@@ -216,7 +216,7 @@ describe('resume', () => {
   });
 
   it('leaves a newer save untouched', async () => {
-    const newer = '{"version":4,"level":9,"cells":["orange"]}';
+    const newer = '{"version":5,"level":9,"cells":["orange"]}';
     Storage.setItemSync(saveKey, newer);
 
     await renderRouter(routes, { initialUrl: '/level' });

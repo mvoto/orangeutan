@@ -1,5 +1,9 @@
 import { setForegroundForTest } from '@/services/foreground';
 
+jest.mock('@/features/nickname/nickname-seed', () => ({
+  freshNicknameSeed: () => 0,
+}));
+
 jest.mock('@/services/play-clock', () => {
   const listeners = new Set<() => void>();
   return {

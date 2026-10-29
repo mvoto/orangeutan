@@ -12,6 +12,8 @@ import type { PropsWithChildren } from 'react';
 
 import { isSolved } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
+import { acceptedNickname, nicknameFromSeed } from '@/features/nickname/nickname';
+import { freshNicknameSeed } from '@/features/nickname/nickname-seed';
 import type { Foreground } from '@/services/foreground';
 import type { PlayClock } from '@/services/play-clock';
 import type { SaveStore } from '@/services/save-store';
@@ -22,7 +24,12 @@ import type { RememberedRules, RuleId } from './rules';
 import { encodeSave, openSave } from './save';
 import { levelNumber, nextLevel } from './sequence';
 
-type StoredSession = LevelSessionState & { readonly preserveDocument: boolean };
+type StoredSession = LevelSessionState & {
+  readonly preserveDocument: boolean;
+  readonly nickname: string;
+};
+
+type StoredAction = LevelSessionAction | { readonly type: 'rename'; readonly nickname: string };
 
 type LevelSession = {
   readonly puzzle: Puzzle;
@@ -46,21 +53,37 @@ type LevelSession = {
   readonly clear: () => void;
   readonly advance: () => void;
   readonly setLevelOpen: (open: boolean) => void;
+  readonly nickname: string;
+  readonly rename: (nickname: string) => void;
 };
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
 
 function readSession(store: SaveStore): StoredSession {
+  const assigned = nicknameFromSeed(freshNicknameSeed());
   try {
-    const opened = openSave(store.read());
-    return { ...opened.state, preserveDocument: opened.preserveDocument };
+    const opened = openSave(store.read(), assigned);
+    return {
+      ...opened.state,
+      preserveDocument: opened.preserveDocument,
+      nickname: opened.nickname ?? assigned,
+    };
   } catch {
-    return { ...startingState(), preserveDocument: false };
+    return { ...startingState(), preserveDocument: false, nickname: assigned };
   }
 }
 
-function storedSessionReducer(state: StoredSession, action: LevelSessionAction): StoredSession {
-  return { ...levelSessionReducer(state, action), preserveDocument: state.preserveDocument };
+function storedSessionReducer(state: StoredSession, action: StoredAction): StoredSession {
+  if (action.type === 'rename') {
+    const accepted = acceptedNickname(action.nickname);
+    if (accepted === null) return state;
+    return { ...state, nickname: accepted };
+  }
+  return {
+    ...levelSessionReducer(state, action),
+    preserveDocument: state.preserveDocument,
+    nickname: state.nickname,
+  };
 }
 
 /** Placed Symbols live here so leaving the app does not clear the grid. */
@@ -120,7 +143,7 @@ export function LevelSessionProvider({
   useEffect(() => {
     if (state.preserveDocument) return;
     try {
-      store.write(encodeSave(state));
+      store.write(encodeSave(state, state.nickname));
     } catch {
       // The session keeps running when the device cannot store it.
     }
@@ -136,6 +159,9 @@ export function LevelSessionProvider({
   }, []);
   const advance = useCallback(() => {
     dispatch({ type: 'advance' });
+  }, []);
+  const rename = useCallback((next: string) => {
+    dispatch({ type: 'rename', nickname: next });
   }, []);
   const finished = solved && nextLevel(state.puzzle) === null;
   const celebrate = solved;
@@ -160,6 +186,8 @@ export function LevelSessionProvider({
       clear,
       advance,
       setLevelOpen,
+      nickname: state.nickname,
+      rename,
     }),
     [
       state.puzzle,
@@ -177,6 +205,8 @@ export function LevelSessionProvider({
       clear,
       advance,
       setLevelOpen,
+      state.nickname,
+      rename,
     ],
   );
 

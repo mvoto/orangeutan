@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { acceptedNickname } from '@/features/nickname/nickname';
 import { useTheme } from '@/theme';
 import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
@@ -21,6 +22,10 @@ type HomeScreenProps = {
   readonly onShare?: () => void;
   /** Opens Privacy and Support. Home does not own that copy. */
   readonly onPrivacy?: () => void;
+  /** The name stored on this device. */
+  readonly nickname: string;
+  /** Called with a name the filter accepted. */
+  readonly onRename?: (nickname: string) => void;
 };
 
 /** First screen after loading. The gear opens the Privacy policy and Support. See docs/adr/0002-anonymous-play.md. */
@@ -32,10 +37,45 @@ export function HomeScreen({
   playTime,
   onShare = noAction,
   onPrivacy = noAction,
+  nickname,
+  onRename = noAction,
 }: HomeScreenProps): React.JSX.Element {
-  const { spacing } = useTheme();
+  const { spacing, colors, radii, typography } = useTheme();
+  const draftRef = useRef(nickname);
+  const [draft, setDraft] = useState(nickname);
   const timer = playTimeLabel(playTime, 'total');
   const centerStyle = useMemo(() => [styles.center, { gap: spacing.lg }], [spacing.lg]);
+  const nicknameInput = useMemo(
+    () => [
+      styles.nicknameInput,
+      {
+        color: colors.textPrimary,
+        fontFamily: typography.body.fontFamily,
+        fontSize: typography.body.fontSize,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+        borderRadius: radii.sm,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: spacing.xs,
+      },
+    ],
+    [colors, typography.body, radii.sm, spacing.sm, spacing.xs],
+  );
+
+  const showDraft = (value: string): void => {
+    draftRef.current = value;
+    setDraft(value);
+  };
+
+  const commitNickname = (): void => {
+    const accepted = acceptedNickname(draftRef.current);
+    if (accepted === null || accepted === nickname) {
+      showDraft(nickname);
+      return;
+    }
+    showDraft(accepted);
+    onRename(accepted);
+  };
 
   return (
     <Screen testID="home-screen">
@@ -53,6 +93,19 @@ export function HomeScreen({
             <AppText>⚙</AppText>
           </View>
         </Pressable>
+      </View>
+      <View style={[styles.nicknameRow, { gap: spacing.sm, marginTop: spacing.sm }]}>
+        <AppText>Nickname</AppText>
+        <TextInput
+          accessibilityLabel="Nickname"
+          value={draft}
+          onChangeText={showDraft}
+          onEndEditing={commitNickname}
+          onSubmitEditing={commitNickname}
+          autoCorrect={false}
+          autoCapitalize="words"
+          style={nicknameInput}
+        />
       </View>
       <View style={centerStyle}>
         <View style={styles.mascotFrame} testID="mascot-frame">
@@ -82,6 +135,8 @@ export function HomeScreen({
 const styles = StyleSheet.create({
   statusRow: { flexDirection: 'row', alignItems: 'center' },
   level: { marginRight: 'auto' },
+  nicknameRow: { flexDirection: 'row', alignItems: 'center' },
+  nicknameInput: { flex: 1, minHeight: 44, borderWidth: 1 },
   gearButton: {
     marginLeft: 'auto',
     minWidth: 44,

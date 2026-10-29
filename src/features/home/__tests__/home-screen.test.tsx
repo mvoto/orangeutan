@@ -19,8 +19,42 @@ async function openHome(): Promise<void> {
 }
 
 describe('<HomeScreen />', () => {
+  it('shows the Nickname', async () => {
+    await renderWithTheme(<HomeScreen level={1} playTime={0} nickname="Calm Orangutan" />);
+
+    expect(screen.getByText('Nickname')).toBeOnTheScreen();
+    expect(screen.getByDisplayValue('Calm Orangutan')).toBeOnTheScreen();
+  });
+
+  it('reports a valid rename', async () => {
+    const onRename = jest.fn();
+    await renderWithTheme(
+      <HomeScreen level={1} playTime={0} nickname="Calm Orangutan" onRename={onRename} />,
+    );
+
+    const input = screen.getByLabelText('Nickname');
+    await fireEvent.changeText(input, 'Sunny Grove');
+    await fireEvent(input, 'endEditing');
+
+    expect(onRename).toHaveBeenCalledWith('Sunny Grove');
+  });
+
+  it('leaves the shown Nickname when the rename is rejected', async () => {
+    const onRename = jest.fn();
+    await renderWithTheme(
+      <HomeScreen level={1} playTime={0} nickname="Calm Orangutan" onRename={onRename} />,
+    );
+
+    const input = screen.getByLabelText('Nickname');
+    await fireEvent.changeText(input, 'Nope!');
+    await fireEvent(input, 'endEditing');
+
+    expect(onRename).not.toHaveBeenCalled();
+    expect(screen.getByDisplayValue('Calm Orangutan')).toBeOnTheScreen();
+  });
+
   it('offers a PLAY button', async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+    await renderWithTheme(<HomeScreen level={1} playTime={0} nickname="Calm Orangutan" />);
 
     expect(screen.getByRole('button', { name: 'PLAY' })).toBeOnTheScreen();
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
@@ -90,13 +124,13 @@ describe('<HomeScreen />', () => {
   });
 
   it('shows the orangutan holding an orange', async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+    await renderWithTheme(<HomeScreen level={1} playTime={0} nickname="Calm Orangutan" />);
 
     expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toBeOnTheScreen();
   });
 
   it('sizes the drawing to its frame so PLAY stays on screen', async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+    await renderWithTheme(<HomeScreen level={1} playTime={0} nickname="Calm Orangutan" />);
 
     expect(screen.getByTestId('mascot-frame')).toHaveStyle({
       maxWidth: 320,

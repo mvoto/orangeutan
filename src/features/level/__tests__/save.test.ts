@@ -62,7 +62,7 @@ describe('save', () => {
   });
 
   it('leaves a newer save on disk', () => {
-    const newer = '{"version":4,"level":1,"cells":[]}';
+    const newer = '{"version":5,"level":1,"cells":[]}';
     const opened = openSave(newer);
 
     expect(opened.state).toEqual(startingState());
@@ -94,6 +94,41 @@ describe('save', () => {
     expect(restored.puzzle.size).toBe(6);
     expect(restored.puzzle.edgeClues.length).toBeGreaterThan(0);
     expect(restored.cells).toHaveLength(36);
+  });
+
+  it('round-trips the Nickname on the current save', () => {
+    const encoded = encodeSave(startingState(), 'Calm Orangutan');
+    const document = JSON.parse(encoded) as { version: unknown; nickname: unknown };
+
+    expect(document.version).toBe(4);
+    expect(document.nickname).toBe('Calm Orangutan');
+    expect(openSave(encoded).nickname).toBe('Calm Orangutan');
+    expect(openSave(encoded).state.cells).toEqual(startingState().cells);
+  });
+
+  it('keeps an older Level and takes the Nickname the caller supplies', () => {
+    const level = startingState();
+    const older = JSON.stringify({
+      version: 3,
+      level: 1,
+      cells: level.cells,
+      seconds: level.seconds,
+      remembered: level.remembered,
+    });
+    const opened = openSave(older, 'Sunny Orange');
+
+    expect(opened.nickname).toBe('Sunny Orange');
+    expect(opened.state.cells).toEqual(level.cells);
+    expect(opened.state.seconds).toEqual(level.seconds);
+    expect(opened.state.remembered).toEqual(level.remembered);
+    expect(opened.state.puzzle).toEqual(level.puzzle);
+  });
+
+  it('starts a fresh Level with no stored Nickname when the save is missing', () => {
+    const opened = openSave(null, 'Calm Orangutan');
+
+    expect(opened.state).toEqual(startingState());
+    expect(opened.nickname).toBeNull();
   });
 
   it('keeps placed Symbols and the current Level', () => {
