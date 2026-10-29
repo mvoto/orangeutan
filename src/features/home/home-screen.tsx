@@ -1,9 +1,17 @@
+import { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
 import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
 const noAction = (): void => undefined;
+
+const privacyPolicy = [
+  'Play time and progress stay on the device.',
+  'Deleting the app deletes them.',
+  'The game collects no name.',
+  'The game is not directed to children under 13.',
+] as const;
 
 /** Width / height of assets/mascot-home.jpg, the issue's chosen center drawing. */
 const mascotAspectRatio = 768 / 1152;
@@ -20,7 +28,7 @@ type HomeScreenProps = {
   readonly onShare?: () => void;
 };
 
-/** First screen after loading. This gear stays inert until release, when it becomes Privacy and Support. See docs/adr/0002-anonymous-play.md. */
+/** First screen after loading. The gear opens the Privacy policy and Support. See docs/adr/0002-anonymous-play.md. */
 export function HomeScreen({
   onPlay = noAction,
   finished = false,
@@ -31,6 +39,9 @@ export function HomeScreen({
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
   const timer = playTimeLabel(playTime, 'total');
+  const [policyOpen, setPolicyOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const policyStyle = { gap: spacing.sm };
 
   return (
     <Screen testID="home-screen">
@@ -39,8 +50,8 @@ export function HomeScreen({
         <AppText accessibilityLabel={timer}>{timer}</AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Settings"
-          onPress={noAction}
+          accessibilityLabel="Privacy and Support"
+          onPress={() => setPolicyOpen(true)}
           hitSlop={spacing.sm}
           style={styles.settingsButton}
         >
@@ -49,6 +60,15 @@ export function HomeScreen({
           </View>
         </Pressable>
       </View>
+      {policyOpen ? (
+        <View style={policyStyle}>
+          {privacyPolicy.map((sentence) => (
+            <AppText key={sentence}>{sentence}</AppText>
+          ))}
+          <Button label="Support" onPress={() => setSupportOpen(true)} />
+          {supportOpen ? <AppText>There is no published support address yet.</AppText> : null}
+        </View>
+      ) : null}
       <View style={[styles.center, { gap: spacing.lg }]}>
         <View style={styles.mascotFrame} testID="mascot-frame">
           <Image
