@@ -3,6 +3,7 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import LoadingRoute from '@/app/index';
+import PrivacyRoute from '@/app/privacy';
 import RootLayout from '@/app/_layout';
 
 describe('app startup', () => {
@@ -20,15 +21,25 @@ describe('app startup', () => {
 
   it('opens the privacy policy from the gear and Level 1 from PLAY', async () => {
     const router = await renderRouter(
-      { _layout: RootLayout, index: LoadingRoute, home: HomeRoute, level: LevelRoute },
+      {
+        _layout: RootLayout,
+        index: LoadingRoute,
+        home: HomeRoute,
+        privacy: PrivacyRoute,
+        level: LevelRoute,
+      },
       { initialUrl: '/' },
     );
 
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
     await fireEvent.press(screen.getByRole('button', { name: 'Privacy and Support' }));
     expect(screen.getByText('Play time and progress stay on the device.')).toBeOnTheScreen();
+    expect(screen.getByText('Deleting the app deletes Play time and progress.')).toBeOnTheScreen();
     expect(screen.getByText('The game is not directed to children under 13.')).toBeOnTheScreen();
-    expect(router.getPathname()).toBe('/home');
+    expect(router.getPathname()).toBe('/privacy');
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+    await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
 
     fireEvent.press(screen.getByRole('button', { name: 'PLAY' }));
 

@@ -1,8 +1,22 @@
 import { fireEvent, screen } from '@testing-library/react-native';
+import { renderRouter } from 'expo-router/testing-library';
+import * as Linking from 'expo-linking';
 
+import HomeRoute from '@/app/home';
+import PrivacyRoute from '@/app/privacy';
+import RootLayout from '@/app/_layout';
 import { renderWithTheme } from '@/test/render-with-theme';
 
 import { HomeScreen } from '../home-screen';
+
+const supportUrl = 'https://github.com/mvoto/orangeutan/issues';
+
+const routes = { _layout: RootLayout, home: HomeRoute, privacy: PrivacyRoute };
+
+async function openHome(): Promise<void> {
+  await renderRouter(routes, { initialUrl: '/home' });
+  await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+}
 
 describe('<HomeScreen />', () => {
   it('offers a PLAY button', async () => {
@@ -12,37 +26,58 @@ describe('<HomeScreen />', () => {
     expect(screen.queryByText('Score')).not.toBeOnTheScreen();
   });
 
-  it('opens the privacy policy from the gear', async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+  it('opens the privacy policy from the gear and returns Home', async () => {
+    const router = await renderRouter(routes, { initialUrl: '/home' });
+    await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
 
+    expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toBeOnTheScreen();
     expect(screen.queryByText('Play time and progress stay on the device.')).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Privacy and Support' }));
 
+    expect(router.getPathname()).toBe('/privacy');
+    expect(screen.queryByTestId('home-screen')).not.toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'PLAY' })).not.toBeOnTheScreen();
+    expect(
+      screen.queryByRole('image', { name: 'Orangutan holding an orange' }),
+    ).not.toBeOnTheScreen();
     expect(screen.getByText('Play time and progress stay on the device.')).toBeOnTheScreen();
-    expect(screen.getByText('Deleting the app deletes them.')).toBeOnTheScreen();
+    expect(screen.getByText('Deleting the app deletes Play time and progress.')).toBeOnTheScreen();
     expect(screen.getByText('The game collects no name.')).toBeOnTheScreen();
     expect(screen.getByText('The game is not directed to children under 13.')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Back' })).toBeOnTheScreen();
+    expect(screen.queryByText('Back')).not.toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+
+    expect(await screen.findByTestId('home-screen', {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(router.getPathname()).toBe('/home');
+    expect(screen.getByRole('button', { name: 'PLAY' })).toBeOnTheScreen();
+    expect(screen.getByRole('image', { name: 'Orangutan holding an orange' })).toBeOnTheScreen();
   });
 
-  it('opens Support from Home in the app', async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+  it('opens the project issues from Support', async () => {
+    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    await openHome();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Privacy and Support' }));
 
-    expect(screen.queryByText('There is no published support address yet.')).not.toBeOnTheScreen();
+    expect(screen.getByText('Support')).toBeOnTheScreen();
+    expect(screen.getByRole('link', { name: supportUrl })).toBeOnTheScreen();
 
-    await fireEvent.press(screen.getByRole('button', { name: 'Support' }));
+    await fireEvent.press(screen.getByRole('link', { name: supportUrl }));
 
-    expect(screen.getByText('There is no published support address yet.')).toBeOnTheScreen();
-    expect(screen.queryByRole('link')).not.toBeOnTheScreen();
+    expect(openURL).toHaveBeenCalledWith(supportUrl);
+    openURL.mockRestore();
   });
 
   it("does not ask the player's age or offer preferences", async () => {
-    await renderWithTheme(<HomeScreen level={1} playTime={0} />);
+    await openHome();
+
+    expect(screen.queryByText(/your age/i)).not.toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: /sound/i })).not.toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Privacy and Support' }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Support' }));
 
     expect(screen.queryByText(/your age/i)).not.toBeOnTheScreen();
     expect(screen.queryByText(/how old/i)).not.toBeOnTheScreen();
