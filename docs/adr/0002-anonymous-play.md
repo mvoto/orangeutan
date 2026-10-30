@@ -1,6 +1,6 @@
 # Anonymous play and a 13+ listing
 
-Orangeutan ships with a generated Nickname stored in the on-device save, and no avatar. The word list is in the app. The player can change that Nickname. A name the filter rejects does not replace it. The gear on Home leads to the Privacy policy and to Support. Play time stays on the device. The Score stays the only shared number. No Rank is published yet. Sound, motion, and type size follow the system. There is no preferences menu.
+Orangeutan ships with a generated Nickname stored in the on-device save, and no avatar. The word list is in the app. The player can change that Nickname. A name the filter rejects does not replace it. Home greets the player with that Nickname. The gear on Home leads to Settings. Settings leads to the Nickname and to the Privacy policy and to Support. Play time stays on the device. The Score stays the only shared number. No Rank is published yet. Sound, motion, and type size follow the system. There is no preferences menu.
 
 The listing is a logic puzzle. The privacy policy says the game is not directed to children under 13. App Store Connect overrides the calculated 4+ to 13+, and the questionnaire lists only content the game has. Google Play's target audience is 13 and older. The app stays out of the Kids Category and Designed for Families, and it never asks the player's age. The orangutan stays. Until ranking, nothing leaves the device except the system share sheet, and the privacy label is Data Not Collected.
 

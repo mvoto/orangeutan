@@ -4,6 +4,7 @@ import HomeRoute from '@/app/home';
 import LevelRoute from '@/app/level';
 import LoadingRoute from '@/app/index';
 import PrivacyRoute from '@/app/privacy';
+import SettingsRoute from '@/app/settings';
 import RootLayout from '@/app/_layout';
 
 describe('app startup', () => {
@@ -25,6 +26,7 @@ describe('app startup', () => {
         _layout: RootLayout,
         index: LoadingRoute,
         home: HomeRoute,
+        settings: SettingsRoute,
         privacy: PrivacyRoute,
         level: LevelRoute,
       },
@@ -32,12 +34,15 @@ describe('app startup', () => {
     );
 
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
+    await fireEvent.press(screen.getByRole('button', { name: 'Settings' }));
+    expect(router.getPathname()).toBe('/settings');
     await fireEvent.press(screen.getByRole('button', { name: 'Privacy and Support' }));
     expect(screen.getByText('Play time and progress stay on the device.')).toBeOnTheScreen();
     expect(screen.getByText('Deleting the app deletes Play time and progress.')).toBeOnTheScreen();
     expect(screen.getByText('The game is not directed to children under 13.')).toBeOnTheScreen();
     expect(router.getPathname()).toBe('/privacy');
 
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });
 

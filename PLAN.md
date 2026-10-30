@@ -56,7 +56,7 @@ ranking are in `docs/adr/0002-anonymous-play.md`.
 - Play time is the whole seconds spent on each Level while it is open and the app is in the foreground. Each Level shows its own time as `timer: 00:01`. Home shows the sum of every Level as `total timer: 00:30` throughout the sequence. The Score stays the count of solved Levels, shown only when every Level is solved, and is still the only shared number.
 - Clear puts the current board back to its Givens. It does not change Play time. There is no undo. Hint can be added later.
 - The device has a generated Nickname the player can change. A rejected name does not replace it. There is no avatar. Share sends the Score alone.
-- The gear on Home leads to the Privacy policy and to Support. There is no menu for sound, haptics, language, appearance, or reset. Sound, motion, and type size follow the system.
+- Home greets the player with the Nickname. The gear on Home leads to Settings. Settings leads to the Nickname and to the Privacy policy and to Support. There is no menu for sound, haptics, language, appearance, or reset. Sound, motion, and type size follow the system.
 
 ### Store
 
