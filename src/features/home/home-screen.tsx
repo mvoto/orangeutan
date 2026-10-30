@@ -19,11 +19,13 @@ type HomeScreenProps = {
   /** Sum of Play time across every Level reached. */
   readonly playTime: number;
   readonly onShare?: () => void;
-  /** Opens Privacy and Support. Home does not own that copy. */
-  readonly onPrivacy?: () => void;
+  /** Opens Settings. Home does not own that copy. */
+  readonly onSettings?: () => void;
+  /** The name stored on this device. Home only greets with it. */
+  readonly nickname: string;
 };
 
-/** First screen after loading. The gear opens the Privacy policy and Support. See docs/adr/0002-anonymous-play.md. */
+/** First screen after loading. The gear opens Settings. See docs/adr/0002-anonymous-play.md. */
 export function HomeScreen({
   onPlay = noAction,
   finished = false,
@@ -31,10 +33,12 @@ export function HomeScreen({
   level,
   playTime,
   onShare = noAction,
-  onPrivacy = noAction,
+  onSettings = noAction,
+  nickname,
 }: HomeScreenProps): React.JSX.Element {
   const { spacing } = useTheme();
   const timer = playTimeLabel(playTime, 'total');
+  const greeting = `Hi, ${nickname}`;
   const centerStyle = useMemo(() => [styles.center, { gap: spacing.lg }], [spacing.lg]);
 
   return (
@@ -44,8 +48,8 @@ export function HomeScreen({
         <AppText accessibilityLabel={timer}>{timer}</AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Privacy and Support"
-          onPress={onPrivacy}
+          accessibilityLabel="Settings"
+          onPress={onSettings}
           hitSlop={spacing.sm}
           style={styles.gearButton}
         >
@@ -54,6 +58,7 @@ export function HomeScreen({
           </View>
         </Pressable>
       </View>
+      <AppText accessibilityLabel={greeting}>{greeting}</AppText>
       <View style={centerStyle}>
         <View style={styles.mascotFrame} testID="mascot-frame">
           <Image

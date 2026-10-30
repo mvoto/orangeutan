@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Pressable, Text } from 'react-native';
 
 import { deviceForeground } from '@/services/foreground';
+import { deviceNicknameSeed } from '@/services/nickname-seed';
 import { devicePlayClock } from '@/services/play-clock';
 import type { SaveStore } from '@/services/save-store';
 
@@ -37,7 +38,12 @@ describe('resume store', () => {
   it('opens the same Symbols after the session is closed', async () => {
     const store = memoryStore();
     const first = await render(
-      <LevelSessionProvider store={store} clock={devicePlayClock} foreground={deviceForeground}>
+      <LevelSessionProvider
+        store={store}
+        clock={devicePlayClock}
+        foreground={deviceForeground}
+        seed={deviceNicknameSeed}
+      >
         <Probe />
       </LevelSessionProvider>,
     );
@@ -46,7 +52,12 @@ describe('resume store', () => {
     await first.unmount();
 
     await render(
-      <LevelSessionProvider store={store} clock={devicePlayClock} foreground={deviceForeground}>
+      <LevelSessionProvider
+        store={store}
+        clock={devicePlayClock}
+        foreground={deviceForeground}
+        seed={deviceNicknameSeed}
+      >
         <Probe />
       </LevelSessionProvider>,
     );
@@ -56,11 +67,16 @@ describe('resume store', () => {
   });
 
   it('does not replace a newer save', async () => {
-    const newer = '{"version":4,"level":4,"cells":["orange"]}';
+    const newer = '{"version":5,"level":4,"cells":["orange"]}';
     const store = memoryStore(newer);
 
     await render(
-      <LevelSessionProvider store={store} clock={devicePlayClock} foreground={deviceForeground}>
+      <LevelSessionProvider
+        store={store}
+        clock={devicePlayClock}
+        foreground={deviceForeground}
+        seed={deviceNicknameSeed}
+      >
         <Probe />
       </LevelSessionProvider>,
     );

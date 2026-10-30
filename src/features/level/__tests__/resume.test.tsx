@@ -58,7 +58,7 @@ describe('resume', () => {
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toBe(
-      '{"version":3,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false}}',
+      '{"version":4,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false},"nickname":"Calm Orangutan"}',
     );
     expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeOnTheScreen();
@@ -131,12 +131,15 @@ describe('resume', () => {
     const cells = solvedLevelOne.cells.map((cell, index) => (index === 2 ? 'empty' : cell));
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: levelOne,
-        cells,
-        seconds: [0],
-        remembered: solvedLevelOne.remembered,
-      }),
+      encodeSave(
+        {
+          puzzle: levelOne,
+          cells,
+          seconds: [0],
+          remembered: solvedLevelOne.remembered,
+        },
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter({ ...routes, celebration: CelebrationRoute }, { initialUrl: '/home' });
@@ -174,7 +177,10 @@ describe('resume', () => {
   it('opens the saved Level with the same Symbols', async () => {
     Storage.setItemSync(
       saveKey,
-      encodeSave(levelSessionReducer(startingState(), { type: 'cycle', index: 2 })),
+      encodeSave(
+        levelSessionReducer(startingState(), { type: 'cycle', index: 2 }),
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(routes, { initialUrl: '/home' });
@@ -216,7 +222,7 @@ describe('resume', () => {
   });
 
   it('leaves a newer save untouched', async () => {
-    const newer = '{"version":4,"level":9,"cells":["orange"]}';
+    const newer = '{"version":5,"level":9,"cells":["orange"]}';
     Storage.setItemSync(saveKey, newer);
 
     await renderRouter(routes, { initialUrl: '/level' });
@@ -240,12 +246,15 @@ describe('resume', () => {
     seconds[0] = 4;
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: last,
-        cells: solution.value.cells,
-        seconds,
-        remembered: solvedLevelOne.remembered,
-      }),
+      encodeSave(
+        {
+          puzzle: last,
+          cells: solution.value.cells,
+          seconds,
+          remembered: solvedLevelOne.remembered,
+        },
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(routes, { initialUrl: '/home' });
@@ -277,12 +286,15 @@ describe('resume', () => {
     if (!solution.ok) throw new Error('The last Level has no solution');
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: last,
-        cells: solution.value.cells,
-        seconds: [0],
-        remembered: solvedLevelOne.remembered,
-      }),
+      encodeSave(
+        {
+          puzzle: last,
+          cells: solution.value.cells,
+          seconds: [0],
+          remembered: solvedLevelOne.remembered,
+        },
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(routes, { initialUrl: '/home' });
@@ -294,7 +306,7 @@ describe('resume', () => {
   });
 
   it('does not open a solved Level 1', async () => {
-    Storage.setItemSync(saveKey, encodeSave(solvedLevelOne));
+    Storage.setItemSync(saveKey, encodeSave(solvedLevelOne, 'Calm Orangutan'));
 
     await renderRouter(routes, { initialUrl: '/home' });
     await screen.findByRole('button', { name: 'PLAY' }, { timeout: 3000 });

@@ -6,6 +6,7 @@ import LevelRoute from '@/app/level';
 import RootLayout from '@/app/_layout';
 import { cellsFromGivens } from '@/engine';
 import { deviceForeground } from '@/services/foreground';
+import { deviceNicknameSeed } from '@/services/nickname-seed';
 import { devicePlayClock } from '@/services/play-clock';
 import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
@@ -27,6 +28,7 @@ async function renderLevel(): Promise<void> {
       store={deviceSaveStore}
       clock={devicePlayClock}
       foreground={deviceForeground}
+      seed={deviceNicknameSeed}
     >
       <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
@@ -172,12 +174,15 @@ describe('rule sheets', () => {
     if (levelTwo === undefined) throw new Error('Level 2 is missing');
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: levelTwo,
-        cells: cellsFromGivens(levelTwo),
-        seconds: [0, 0],
-        remembered: { 'no-three-in-a-row': true, balance: true, 'edge-clues': false },
-      }),
+      encodeSave(
+        {
+          puzzle: levelTwo,
+          cells: cellsFromGivens(levelTwo),
+          seconds: [0, 0],
+          remembered: { 'no-three-in-a-row': true, balance: true, 'edge-clues': false },
+        },
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(routes, { initialUrl: '/level' });
@@ -202,12 +207,15 @@ describe('rule sheets', () => {
     if (later === undefined) throw new Error('Level 3 is missing');
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: later,
-        cells: cellsFromGivens(later),
-        seconds: [0, 0, 0],
-        remembered: { 'no-three-in-a-row': true, balance: true, 'edge-clues': true },
-      }),
+      encodeSave(
+        {
+          puzzle: later,
+          cells: cellsFromGivens(later),
+          seconds: [0, 0, 0],
+          remembered: { 'no-three-in-a-row': true, balance: true, 'edge-clues': true },
+        },
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(routes, { initialUrl: '/level' });
