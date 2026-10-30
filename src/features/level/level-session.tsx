@@ -13,8 +13,8 @@ import type { PropsWithChildren } from 'react';
 import { isSolved } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
 import { acceptedNickname, nicknameFromSeed } from '@/features/nickname/nickname';
-import { freshNicknameSeed } from '@/features/nickname/nickname-seed';
 import type { Foreground } from '@/services/foreground';
+import type { NicknameSeed } from '@/services/nickname-seed';
 import type { PlayClock } from '@/services/play-clock';
 import type { SaveStore } from '@/services/save-store';
 
@@ -59,8 +59,9 @@ type LevelSession = {
 
 const LevelSessionContext = createContext<LevelSession | null>(null);
 
-function readSession(store: SaveStore): StoredSession {
-  const assigned = nicknameFromSeed(freshNicknameSeed());
+function readSession(input: { store: SaveStore; seed: NicknameSeed }): StoredSession {
+  const { store, seed } = input;
+  const assigned = nicknameFromSeed(seed.next());
   try {
     const opened = openSave(store.read(), assigned);
     return {
@@ -92,12 +93,14 @@ export function LevelSessionProvider({
   store,
   clock,
   foreground,
+  seed,
 }: PropsWithChildren<{
   readonly store: SaveStore;
   readonly clock: PlayClock;
   readonly foreground: Foreground;
+  readonly seed: NicknameSeed;
 }>): React.JSX.Element {
-  const [state, dispatch] = useReducer(storedSessionReducer, store, readSession);
+  const [state, dispatch] = useReducer(storedSessionReducer, { store, seed }, readSession);
   const [levelOpen, setLevelOpenState] = useState(false);
   const [inForeground, setInForeground] = useState(() => foreground.now());
   const levelOpenRef = useRef(false);

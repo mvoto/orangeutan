@@ -1,5 +1,6 @@
 import { isSolved } from '@/engine';
 import type { Cell, Puzzle } from '@/engine';
+import { acceptedNickname } from '@/features/nickname/nickname';
 
 import { levelSessionReducer, startingState } from './level-session-state';
 import type { LevelSessionState } from './level-session-state';
@@ -17,14 +18,14 @@ export type OpenedSave = {
   readonly nickname: string | null;
 };
 
-export function encodeSave(state: LevelSessionState, nickname?: string): string {
+export function encodeSave(state: LevelSessionState, nickname: string): string {
   return JSON.stringify({
     version: saveVersion,
     level: levelNumber(state.puzzle),
     cells: state.cells,
     seconds: state.seconds,
     remembered: state.remembered,
-    ...(nickname === undefined ? {} : { nickname }),
+    nickname,
   });
 }
 
@@ -110,11 +111,13 @@ function migrate(value: unknown):
   return { kind: 'invalid' };
 }
 
-/** A current document keeps its Nickname. An older one takes the name the caller supplies. */
+/** A current document keeps a Nickname the filter accepts. An older one takes the name the caller supplies. */
 function nicknameFor(value: unknown, supplied: string | undefined): string | null {
   if (typeof value !== 'object' || value === null) return null;
   const record = value as { version?: unknown; nickname?: unknown };
-  if (record.version === saveVersion && typeof record.nickname === 'string') return record.nickname;
+  if (record.version === saveVersion && typeof record.nickname === 'string') {
+    return acceptedNickname(record.nickname);
+  }
   if (typeof record.version === 'number' && record.version < saveVersion) return supplied ?? null;
   return null;
 }

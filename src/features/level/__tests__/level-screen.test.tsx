@@ -9,6 +9,7 @@ import RootLayout from '@/app/_layout';
 import { logicalSolution } from '@/engine';
 import type { Puzzle } from '@/engine';
 import { deviceForeground } from '@/services/foreground';
+import { deviceNicknameSeed } from '@/services/nickname-seed';
 import { devicePlayClock } from '@/services/play-clock';
 import { deviceSaveStore, saveKey } from '@/services/save-store';
 import { renderWithTheme } from '@/test/render-with-theme';
@@ -53,6 +54,7 @@ function renderLevel(theme?: Theme): ReturnType<typeof renderWithTheme> {
       store={deviceSaveStore}
       clock={devicePlayClock}
       foreground={deviceForeground}
+      seed={deviceNicknameSeed}
     >
       <LevelScreen onBack={() => undefined} />
     </LevelSessionProvider>,
@@ -102,7 +104,7 @@ describe('Level 1', () => {
       { ...startingState(), seconds: [7] },
       { type: 'cycle', index: 2 },
     );
-    Storage.setItemSync(saveKey, encodeSave(played));
+    Storage.setItemSync(saveKey, encodeSave(played, 'Calm Orangutan'));
     await renderLevel();
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
@@ -289,16 +291,19 @@ describe('the last Level', () => {
     const cells = solution.value.cells.map((cell, index) => (index === open ? 'empty' : cell));
     Storage.setItemSync(
       saveKey,
-      encodeSave({
-        puzzle: last,
-        cells,
-        seconds: [0],
-        remembered: {
-          'no-three-in-a-row': false,
-          balance: false,
-          'edge-clues': false,
+      encodeSave(
+        {
+          puzzle: last,
+          cells,
+          seconds: [0],
+          remembered: {
+            'no-three-in-a-row': false,
+            balance: false,
+            'edge-clues': false,
+          },
         },
-      }),
+        'Calm Orangutan',
+      ),
     );
 
     await renderRouter(

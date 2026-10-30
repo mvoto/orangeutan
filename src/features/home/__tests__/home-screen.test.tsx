@@ -49,7 +49,7 @@ describe('<HomeScreen />', () => {
     await fireEvent.changeText(input, 'Nope!');
     await fireEvent(input, 'endEditing');
 
-    expect(onRename).not.toHaveBeenCalled();
+    expect(onRename).toHaveBeenCalledWith('Nope!');
     expect(screen.getByDisplayValue('Calm Orangutan')).toBeOnTheScreen();
   });
 

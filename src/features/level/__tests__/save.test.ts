@@ -43,7 +43,7 @@ describe('save', () => {
     expect(decodeSave('{"version":3,"level":1,"cells":[]}')).toEqual(startingState());
     expect(decodeSave('{"version":1,"level":9,"cells":[]}')).toEqual(startingState());
 
-    const changedGiven = encodeSave(startingState());
+    const changedGiven = encodeSave(startingState(), 'Calm Orangutan');
     const broken = changedGiven.replace('"orange"', '"monkey"');
     expect(decodeSave(broken)).toEqual(startingState());
     expect(openSave('not json').preserveDocument).toBe(false);
@@ -72,24 +72,29 @@ describe('save', () => {
   it('stores the Level by its place in the sequence', () => {
     const stranger = { ...levelOne, edgeClues: [] };
 
-    expect(JSON.parse(encodeSave(startingState())).level).toBe(1);
+    expect(JSON.parse(encodeSave(startingState(), 'Calm Orangutan')).level).toBe(1);
     expect(
-      JSON.parse(encodeSave(levelSessionReducer(startingState(), { type: 'advance' }))).level,
+      JSON.parse(
+        encodeSave(levelSessionReducer(startingState(), { type: 'advance' }), 'Calm Orangutan'),
+      ).level,
     ).toBe(2);
     expect(() =>
-      encodeSave({
-        puzzle: stranger,
-        cells: startingState().cells,
-        seconds: [0],
-        remembered: startingState().remembered,
-      }),
+      encodeSave(
+        {
+          puzzle: stranger,
+          cells: startingState().cells,
+          seconds: [0],
+          remembered: startingState().remembered,
+        },
+        'Calm Orangutan',
+      ),
     ).toThrow('Puzzle is not in the Level sequence');
   });
 
   it('retires a solved Level 1 as Level 2', () => {
     expect(isSolved(levelOne, solvedLevelOne.cells)).toBe(true);
 
-    const restored = decodeSave(encodeSave(solvedLevelOne));
+    const restored = decodeSave(encodeSave(solvedLevelOne, 'Calm Orangutan'));
 
     expect(restored.puzzle.size).toBe(6);
     expect(restored.puzzle.edgeClues.length).toBeGreaterThan(0);
@@ -124,6 +129,21 @@ describe('save', () => {
     expect(opened.state.puzzle).toEqual(level.puzzle);
   });
 
+  it('drops a stored Nickname the filter rejects', () => {
+    const level = startingState();
+    const rejected = JSON.stringify({
+      version: 4,
+      level: 1,
+      cells: level.cells,
+      seconds: level.seconds,
+      remembered: level.remembered,
+      nickname: 'nope!!',
+    });
+
+    expect(openSave(rejected, 'Sunny Orange').nickname).toBeNull();
+    expect(openSave(rejected).state.cells).toEqual(level.cells);
+  });
+
   it('starts a fresh Level with no stored Nickname when the save is missing', () => {
     const opened = openSave(null, 'Calm Orangutan');
 
@@ -133,10 +153,10 @@ describe('save', () => {
 
   it('keeps placed Symbols and the current Level', () => {
     const placed = levelSessionReducer(startingState(), { type: 'cycle', index: 2 });
-    expect(decodeSave(encodeSave(placed)).cells[2]).toBe('monkey');
+    expect(decodeSave(encodeSave(placed, 'Calm Orangutan')).cells[2]).toBe('monkey');
 
     const levelTwo = levelSessionReducer(startingState(), { type: 'advance' });
-    const restored = decodeSave(encodeSave(levelTwo));
+    const restored = decodeSave(encodeSave(levelTwo, 'Calm Orangutan'));
     expect(restored.cells).toHaveLength(36);
     expect(restored.puzzle.size).toBe(6);
     expect(restored.puzzle.edgeClues.length).toBeGreaterThan(0);

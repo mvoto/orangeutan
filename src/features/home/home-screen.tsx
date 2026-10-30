@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { acceptedNickname } from '@/features/nickname/nickname';
 import { useTheme } from '@/theme';
 import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
@@ -24,7 +23,7 @@ type HomeScreenProps = {
   readonly onPrivacy?: () => void;
   /** The name stored on this device. */
   readonly nickname: string;
-  /** Called with a name the filter accepted. */
+  /** The session keeps the Nickname when this draft is rejected. */
   readonly onRename?: (nickname: string) => void;
 };
 
@@ -42,7 +41,8 @@ export function HomeScreen({
 }: HomeScreenProps): React.JSX.Element {
   const { spacing, colors, radii, typography } = useTheme();
   const draftRef = useRef(nickname);
-  const [draft, setDraft] = useState(nickname);
+  const [draft, setDraft] = useState<string | null>(null);
+  const shown = draft ?? nickname;
   const timer = playTimeLabel(playTime, 'total');
   const centerStyle = useMemo(() => [styles.center, { gap: spacing.lg }], [spacing.lg]);
   const nicknameInput = useMemo(
@@ -68,13 +68,9 @@ export function HomeScreen({
   };
 
   const commitNickname = (): void => {
-    const accepted = acceptedNickname(draftRef.current);
-    if (accepted === null || accepted === nickname) {
-      showDraft(nickname);
-      return;
-    }
-    showDraft(accepted);
-    onRename(accepted);
+    onRename(draftRef.current);
+    draftRef.current = nickname;
+    setDraft(null);
   };
 
   return (
@@ -98,7 +94,7 @@ export function HomeScreen({
         <AppText>Nickname</AppText>
         <TextInput
           accessibilityLabel="Nickname"
-          value={draft}
+          value={shown}
           onChangeText={showDraft}
           onEndEditing={commitNickname}
           onSubmitEditing={commitNickname}
