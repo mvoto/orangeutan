@@ -58,7 +58,7 @@ describe('resume', () => {
 
     expect(screen.getByRole('button', { name: 'Row 1, column 3, monkey' })).toBeOnTheScreen();
     expect(Storage.getItemSync(saveKey)).toBe(
-      '{"version":4,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":true,"balance":true,"edge-clues":false},"nickname":"Calm Orangutan"}',
+      '{"version":4,"level":1,"cells":["orange","orange","monkey","empty","empty","empty","monkey","monkey","empty","empty","empty","empty","empty","empty","empty","empty"],"seconds":[0],"remembered":{"no-three-in-a-row":false,"balance":false,"edge-clues":false},"nickname":"Calm Orangutan"}',
     );
     expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reset' })).not.toBeOnTheScreen();

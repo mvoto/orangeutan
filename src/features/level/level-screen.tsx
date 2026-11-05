@@ -11,14 +11,7 @@ import { AppText, Button, playTimeLabel, Screen } from '@/ui';
 
 import { useLevelSession } from './level-session';
 import { RuleDiagram } from './rule-diagram';
-import {
-  firstUnseen,
-  oppositeMark,
-  ruleAfterClose,
-  ruleCopy,
-  rulesOnPuzzle,
-  sameMark,
-} from './rules';
+import { oppositeMark, ruleCopy, rulesOnPuzzle, sameMark } from './rules';
 import type { RuleId } from './rules';
 
 type LevelScreenProps = {
@@ -37,13 +30,11 @@ type GridCellProps = {
 
 export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
   const { colors, spacing, radii } = useTheme();
-  const { cells, clear, cycle, level, playSeconds, puzzle, remembered, remember } =
-    useLevelSession();
+  const { cells, clear, cycle, level, playSeconds, puzzle } = useLevelSession();
   const timer = playTimeLabel(playSeconds);
   const size = puzzle.size;
   const rules = useMemo(() => rulesOnPuzzle(puzzle), [puzzle]);
-  // The Level route remounts after the Celebration, so the first unremembered rule opens again.
-  const [openRule, setOpenRule] = useState<RuleId | null>(() => firstUnseen(puzzle, remembered));
+  const [openRule, setOpenRule] = useState<RuleId | null>(null);
   const outlined = useMemo(() => outlinedCells(cells, puzzle.edgeClues), [cells, puzzle.edgeClues]);
   const headerStyle = useMemo(() => [styles.header, { gap: spacing.sm }], [spacing.sm]);
   const backArrowStyle = useMemo(
@@ -96,9 +87,7 @@ export function LevelScreen({ onBack }: LevelScreenProps): React.JSX.Element {
     [colors.surface, colors.border, radii.md, spacing.md, spacing.sm],
   );
   const dismiss = (): void => {
-    if (openRule === null) return;
-    if (!remembered[openRule]) remember(openRule);
-    setOpenRule(ruleAfterClose(puzzle, remembered, openRule));
+    setOpenRule(null);
   };
   const showRule = (rule: RuleId): void => {
     if (rule === openRule) return;
