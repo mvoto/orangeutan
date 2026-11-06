@@ -46,16 +46,3 @@ export function rulesOnPuzzle(puzzle: Puzzle): readonly RuleId[] {
   if (puzzle.edgeClues.length > 0) return ruleOrder;
   return ruleOrder.filter((rule) => rule !== 'edge-clues');
 }
-
-export function firstUnseen(puzzle: Puzzle, remembered: RememberedRules): RuleId | null {
-  return rulesOnPuzzle(puzzle).find((rule) => !remembered[rule]) ?? null;
-}
-
-/** Closing remembers that rule, then opens the next one this Puzzle has not remembered. */
-export function ruleAfterClose(
-  puzzle: Puzzle,
-  remembered: RememberedRules,
-  closed: RuleId,
-): RuleId | null {
-  return firstUnseen(puzzle, { ...remembered, [closed]: true });
-}

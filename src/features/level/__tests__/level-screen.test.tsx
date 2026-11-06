@@ -246,7 +246,7 @@ describe('Level 1', () => {
     expect(screen.queryByText('Level 1')).not.toBeOnTheScreen();
     expect(screen.getAllByLabelText('Edge clue, same')).toHaveLength(2);
     expect(screen.getByRole('button', { name: given })).toBeOnTheScreen();
-    expect(screen.getByText('= means the same. × means different.')).toBeOnTheScreen();
+    expect(screen.queryByText('= means the same. × means different.')).not.toBeOnTheScreen();
     expect(screen.queryByText('Not three of the same in a row or a column.')).not.toBeOnTheScreen();
     await closeIntroduction();
 
